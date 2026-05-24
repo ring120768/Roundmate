@@ -9,7 +9,8 @@ import Link from "next/link";
 export default function Brand({ variant = "bar" }) {
   const [imgOk, setImgOk] = useState(true);
 
-  if (variant === "hero") {
+  if (variant === "hero" || variant === "landing") {
+    const imgClass = variant === "landing" ? "brand-landing-img" : "brand-hero-img";
     return (
       <div className="brand-hero">
         {imgOk && (
@@ -17,7 +18,7 @@ export default function Brand({ variant = "bar" }) {
           <img
             src="/logo.png"
             alt="Pugsie PA"
-            className="brand-hero-img"
+            className={imgClass}
             onError={() => setImgOk(false)}
           />
         )}

@@ -16,7 +16,7 @@ export default function LandingPage() {
         textAlign: "center",
       }}
     >
-      <Brand variant="hero" />
+      <Brand variant="landing" />
       <Link href="/dashboard" style={{ width: "100%", maxWidth: 300 }}>
         <button type="button">Enter</button>
       </Link>
