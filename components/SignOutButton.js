@@ -14,7 +14,7 @@ export default function SignOutButton() {
   }
 
   return (
-    <button type="button" className="secondary" onClick={handleSignOut}>
+    <button type="button" className="btn-grey" onClick={handleSignOut}>
       Sign out
     </button>
   );

@@ -187,3 +187,15 @@ button.secondary {
 .cal-today { border-color: var(--brand); }
 .cal-sel { background: var(--brand); color: #fff; border-color: var(--brand); }
 .cal-sel .cal-dot { background: #fff; color: var(--brand); }
+
+/* Subtle colour-coded dashboard buttons */
+.btn-indigo { background: #e6f1fb; color: #185fa5; border: 1px solid #b5d4f4; }
+.btn-teal   { background: #e1f5ee; color: #0f6e56; border: 1px solid #9fe1cb; }
+.btn-green  { background: #eef6e2; color: #3b6d11; border: 1px solid #c0dd97; }
+.btn-amber  { background: #faeeda; color: #854f0b; border: 1px solid #fac775; }
+.btn-grey   { background: #f1efe8; color: #5f5e5a; border: 1px solid #d3d1c7; }
+.btn-indigo:active,
+.btn-teal:active,
+.btn-green:active,
+.btn-amber:active,
+.btn-grey:active { filter: brightness(0.97); }

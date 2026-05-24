@@ -100,22 +100,22 @@ export default async function DashboardPage() {
         <button type="button">+ Add job</button>
       </Link>
       <Link href="/jobs">
-        <button type="button" className="secondary">
+        <button type="button" className="btn-indigo">
           All jobs
         </button>
       </Link>
       <Link href="/calendar">
-        <button type="button" className="secondary">
+        <button type="button" className="btn-teal">
           Calendar
         </button>
       </Link>
       <Link href="/rounds">
-        <button type="button" className="secondary">
+        <button type="button" className="btn-green">
           Fill my round
         </button>
       </Link>
       <Link href="/customers">
-        <button type="button" className="secondary">
+        <button type="button" className="btn-amber">
           Customers
         </button>
       </Link>
