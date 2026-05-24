@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
 
@@ -62,6 +63,10 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      <Link href="/customers">
+        <button type="button">Customers</button>
+      </Link>
 
       <SignOutButton />
     </div>

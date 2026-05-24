@@ -48,13 +48,21 @@ label {
   margin: 18px 0 6px;
 }
 
-input {
+input,
+select,
+textarea {
   width: 100%;
   padding: 14px;
   font-size: 16px; /* 16px stops mobile browsers zooming on focus */
   border: 1px solid var(--border);
   border-radius: 12px;
   background: #fff;
+}
+
+textarea {
+  min-height: 90px;
+  font-family: inherit;
+  resize: vertical;
 }
 
 /* Big, thumb-friendly buttons. */

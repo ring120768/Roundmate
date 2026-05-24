@@ -15,10 +15,11 @@ The guiding test for any feature: **does it help the user save time, get paid fa
 ## Current state (as of 2026-05-24)
 
 - **Phase 0 (product definition) is done.** PRD, README, and ROADMAP are written and live in this folder.
-- **Phase 1 — Supabase database foundation is DONE and verified.** The 8 core tables, RLS policies, and Storage buckets are all live in the project below. Security advisor is clean (0 warnings).
-- **Still to do in Phase 1:** Railway backend skeleton + health check, Next.js app skeleton with Supabase Auth login, env vars wired up. Cross-business RLS isolation is structurally complete but should be smoke-tested once auth/login works (it's a Phase 1 exit criterion).
-- **Frontend decided: Next.js** — a mobile-first responsive web app (not Expo/React Native for now). Reasons: fastest to ship, works in the phone browser immediately, no app store approval, simplest path for a first launch. A native app can come later. Not scaffolded yet.
-- **Accounts:** Ringo has Supabase and Railway accounts. Supabase project for Pugsie PA now exists (see below). Railway project not created yet. Stripe is **not set up yet** (needed for Phase 5).
+- **Phase 1 (foundation) is DONE.** Supabase schema + RLS + Storage all live and verified (security advisor clean). Next.js app scaffolded, deployed to Vercel, and the full auth chain works end to end: sign up → log in → onboarding (create business) → dashboard, with RLS holding. Phase 1 exit criteria met.
+- **Railway intentionally deferred.** A Next.js app talks to Supabase directly, so no server is needed yet. Railway comes in later phases (Stripe webhooks, invoice PDFs, reminders). Not created.
+- **Frontend: Next.js** (mobile-first responsive web app, JavaScript + App Router). Lives in this folder. Hosted on Vercel free tier (move to Pro when it earns money).
+- **Next up: Phase 2** — customers and jobs (add/edit/list/search customers; jobs + daily list).
+- **Accounts:** Supabase project exists (see below). GitHub repo + Vercel project live (see Deployment). Railway not created. Stripe is **not set up yet** (needed for Phase 5).
 
 ## Supabase project
 
@@ -30,6 +31,15 @@ The guiding test for any feature: **does it help the user save time, get paid fa
 - **Multi-tenancy model:** every business-owned table has a `business_id`. RLS uses `private.current_business_id()` (a SECURITY DEFINER helper in the non-API `private` schema) to scope every read/write to the logged-in user's business. A trigger on `auth.users` auto-creates a `profiles` row on signup; onboarding then creates a `businesses` row and links the profile's `business_id`.
 - **Onboarding flow the app must implement:** sign up → profile auto-created (business_id null) → app inserts a `businesses` row → app updates own profile's `business_id` → all other tables become accessible.
 - **Storage buckets:** `invoices` and `photos`, both private; files must be stored under a `<business_id>/...` path prefix for the isolation policy to work.
+
+## Deployment / app
+
+- **Repo:** GitHub `ring120768/Pugsie-PA`, default branch `main`.
+- **Host:** Vercel (free tier), auto-deploys from `main`. Live at `https://pugsie-pa.vercel.app`.
+- **Stack in repo:** Next.js 14.2.35 (App Router, JavaScript), `@supabase/ssr` for auth. Key files: `middleware.js` (session refresh), `lib/supabase/{client,server}.js`, `app/login`, `app/onboarding`, `app/dashboard`, `app/page.js` (the routing gate that sends users to login / onboarding / dashboard).
+- **Env vars** (set in Vercel project settings AND local `.env.local`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The secret service-role key is NOT in the repo or frontend.
+- **Supabase Auth:** email confirmation is currently OFF for MVP (signup → instant login). Re-enable with a real email provider in a later phase.
+- **Git note:** run git from Ringo's own Mac terminal, not from the sandbox — the sandbox can't remove `.git` lock files on the mounted folder, which leaves the repo wedged.
 
 ## Tech stack
 
