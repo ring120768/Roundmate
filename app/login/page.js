@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import Brand from "@/components/Brand";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,10 +54,7 @@ export default function LoginPage() {
 
   return (
     <div className="container">
-      <div className="center" style={{ marginBottom: 24 }}>
-        <h1>Pugsie PA</h1>
-        <p className="muted">Jobs, invoices and payments — sorted.</p>
-      </div>
+      <Brand variant="hero" />
 
       <div className="card">
         <h2>Sign in</h2>

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
+import Brand from "@/components/Brand";
 import { statusLabel } from "@/lib/jobOptions";
 
 export default async function DashboardPage() {
@@ -37,6 +38,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="container">
+      <Brand variant="bar" />
       <div style={{ marginBottom: 16 }}>
         <h1>Today</h1>
         <p className="muted">
@@ -100,6 +102,11 @@ export default async function DashboardPage() {
       <Link href="/jobs">
         <button type="button" className="secondary">
           All jobs
+        </button>
+      </Link>
+      <Link href="/calendar">
+        <button type="button" className="secondary">
+          Calendar
         </button>
       </Link>
       <Link href="/rounds">
