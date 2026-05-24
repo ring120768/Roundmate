@@ -28,8 +28,8 @@ export default function LoginPage() {
       setError(error.message);
       return;
     }
-    // The home page decides where to send them (onboarding or dashboard).
-    router.push("/");
+    // Dashboard sends them on to onboarding if they have no business yet.
+    router.push("/dashboard");
     router.refresh();
   }
 

@@ -1,30 +1,25 @@
-import { redirect } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
+import Brand from "@/components/Brand";
 
-// The front door. Sends the user to the right place based on their state:
-//   not logged in       -> /login
-//   logged in, no biz   -> /onboarding
-//   logged in, has biz  -> /dashboard
-export default async function Home() {
-  const supabase = createClient();
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("business_id")
-    .eq("id", user.id)
-    .single();
-
-  if (!profile?.business_id) {
-    redirect("/onboarding");
-  }
-
-  redirect("/dashboard");
+// Branded landing / splash screen. Tap Enter to go into the app.
+// (The dashboard handles auth: it sends you to login or onboarding as needed.)
+export default function LandingPage() {
+  return (
+    <div
+      className="container"
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+        textAlign: "center",
+      }}
+    >
+      <Brand variant="hero" />
+      <Link href="/dashboard" style={{ width: "100%", maxWidth: 300 }}>
+        <button type="button">Enter</button>
+      </Link>
+    </div>
+  );
 }
