@@ -102,6 +102,11 @@ export default async function DashboardPage() {
           All jobs
         </button>
       </Link>
+      <Link href="/rounds">
+        <button type="button" className="secondary">
+          Fill my round
+        </button>
+      </Link>
       <Link href="/customers">
         <button type="button" className="secondary">
           Customers

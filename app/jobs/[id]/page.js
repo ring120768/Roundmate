@@ -1,7 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { statusLabel } from "@/lib/jobOptions";
+import { statusLabel, paymentLabel } from "@/lib/jobOptions";
 
 function Field({ label, value }) {
   return (
@@ -49,11 +49,31 @@ export default async function JobDetailPage({ params }) {
         <Field label="Date" value={dateLabel} />
         <Field label="Price" value={job.price != null ? `£${job.price}` : null} />
         <Field label="Status" value={statusLabel(job.status)} />
+        {job.payment_status && (
+          <Field label="Payment" value={paymentLabel(job.payment_status)} />
+        )}
+        {job.completed_at && (
+          <Field
+            label="Completed"
+            value={new Date(job.completed_at).toLocaleDateString("en-GB", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          />
+        )}
         <Field label="Notes" value={job.notes} />
       </div>
 
+      {job.status !== "completed" && (
+        <Link href={`/jobs/${id}/complete`}>
+          <button type="button">Complete job</button>
+        </Link>
+      )}
       <Link href={`/jobs/${id}/edit`}>
-        <button type="button">Edit job</button>
+        <button type="button" className="secondary">
+          Edit job
+        </button>
       </Link>
 
       {cust && (

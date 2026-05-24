@@ -20,6 +20,7 @@ export default function JobForm({
   initial = null,
   jobId = null,
   preselectedCustomerId = "",
+  preselectedDate = "",
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -34,7 +35,7 @@ export default function JobForm({
 
   const [form, setForm] = useState({
     customer_id: startCustomerId,
-    appointment_date: initial?.appointment_date ?? todayISO(),
+    appointment_date: initial?.appointment_date ?? (preselectedDate || todayISO()),
     service_type: initial?.service_type ?? "Window cleaning",
     price: startPrice ?? "",
     status: initial?.status ?? "scheduled",

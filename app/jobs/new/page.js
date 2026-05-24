@@ -15,12 +15,17 @@ export default async function NewJobPage({ searchParams }) {
     .order("first_name", { ascending: true });
 
   const preselect = searchParams?.customer ?? "";
+  const preselectDate = searchParams?.date ?? "";
 
   return (
     <div className="container">
       <h1>Add job</h1>
       <div className="spacer" />
-      <JobForm customers={customers ?? []} preselectedCustomerId={preselect} />
+      <JobForm
+        customers={customers ?? []}
+        preselectedCustomerId={preselect}
+        preselectedDate={preselectDate}
+      />
     </div>
   );
 }

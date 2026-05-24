@@ -18,7 +18,8 @@ The guiding test for any feature: **does it help the user save time, get paid fa
 - **Phase 1 (foundation) is DONE.** Supabase schema + RLS + Storage all live and verified (security advisor clean). Next.js app scaffolded, deployed to Vercel, and the full auth chain works end to end: sign up → log in → onboarding (create business) → dashboard, with RLS holding. Phase 1 exit criteria met.
 - **Railway intentionally deferred.** A Next.js app talks to Supabase directly, so no server is needed yet. Railway comes in later phases (Stripe webhooks, invoice PDFs, reminders). Not created.
 - **Frontend: Next.js** (mobile-first responsive web app, JavaScript + App Router). Lives in this folder. Hosted on Vercel free tier (move to Pro when it earns money).
-- **Phase 2 largely built & deployed** — customers (list/add/edit/search + CSV import) and jobs (add/edit/list, today's list on the dashboard, manual status, book-from-customer) are live. Jobs are individual + date-only (round-based); auto-repeat from visit frequency is deliberately deferred to a later phase. Next: Phase 3 (job completion workflow → invoice).
+- **Phase 2 largely built & deployed** — customers (list/add/edit/search + CSV import) and jobs (add/edit/list, today's list on the dashboard, manual status, book-from-customer) are live. Jobs are individual + date-only (round-based); auto-repeat from visit frequency is deliberately deferred to a later phase. There's also a Smart Rounds "Fill my round" page (`/rounds`) that groups nearby customers by postcode district for a chosen day.
+- **Phase 3 (job completion workflow) built & deployed** — the job detail page has a Complete flow (`/jobs/[id]/complete`): mark complete (sets `status` + `completed_at`), record payment outcome (cash / bank / unpaid / free) on `jobs.payment_status`, optional note, and auto-book the next visit (date suggested from the customer's visit frequency). NOT yet done: generating or sending an actual invoice/receipt — that's Phase 4 (needs an email provider). Next: Phase 4 (invoicing + unpaid dashboard + email setup).
 - **Accounts:** Supabase project exists (see below). GitHub repo + Vercel project live (see Deployment). Railway not created. Stripe is **not set up yet** (needed for Phase 5).
 
 ## Supabase project
@@ -69,7 +70,7 @@ Build money-first, AI last. The short version:
 11. Christmas lights CRM
 12. AI assistant
 
-Steps 1–4 are done (foundation + customers + jobs/daily list). Current target: step 5 — Job Complete checkbox + completion workflow (Phase 3).
+Steps 1–5 are done (foundation + customers + jobs/daily list + job completion). Current target: step 6 — invoice generation + cash/manual paid status + unpaid dashboard (Phase 4), which is also where we set up an email provider (used for both invoices and the deferred appointment-confirmation emails).
 
 ## Core data model
 
