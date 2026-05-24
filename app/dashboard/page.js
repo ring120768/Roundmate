@@ -2,70 +2,110 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
+import { statusLabel } from "@/lib/jobOptions";
 
-// The signed-in home screen. For now it just proves the whole chain works:
-// we read the user's business back out of the database (under RLS) and show it.
-// Real "Today's jobs" content comes in Phase 2.
 export default async function DashboardPage() {
   const supabase = createClient();
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect("/login");
-  }
+  if (!user) redirect("/login");
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("full_name, business_id, businesses(name)")
     .eq("id", user.id)
     .single();
-
-  if (!profile?.business_id) {
-    redirect("/onboarding");
-  }
+  if (!profile?.business_id) redirect("/onboarding");
 
   const businessName = profile.businesses?.name ?? "your business";
   const firstName = (profile.full_name || "").split(" ")[0];
 
+  // Jobs booked for today (UK time).
+  const today = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Europe/London",
+  });
+  const { data: todaysJobs } = await supabase
+    .from("jobs")
+    .select("id, service_type, price, status, customers(first_name, last_name, postcode)")
+    .eq("appointment_date", today)
+    .order("created_at", { ascending: true });
+
+  const jobs = todaysJobs ?? [];
+  const dayValue = jobs.reduce((sum, j) => sum + (j.price ? Number(j.price) : 0), 0);
+
   return (
     <div className="container">
-      <div className="row" style={{ marginBottom: 20 }}>
-        <div>
-          <h1>Today</h1>
-          <p className="muted">
-            {firstName ? `Hi ${firstName} — ` : ""}
-            {businessName}
-          </p>
-        </div>
+      <div style={{ marginBottom: 16 }}>
+        <h1>Today</h1>
+        <p className="muted">
+          {firstName ? `Hi ${firstName} — ` : ""}
+          {businessName}
+        </p>
       </div>
 
       <div className="card">
-        <h2>Jobs today</h2>
-        <p className="stat">0</p>
-        <p className="muted">No jobs yet. Adding customers and jobs is next.</p>
+        <div className="row">
+          <div>
+            <p className="muted">Jobs today</p>
+            <p className="stat">{jobs.length}</p>
+          </div>
+          <div>
+            <p className="muted">Day&apos;s value</p>
+            <p className="stat">£{dayValue}</p>
+          </div>
+        </div>
       </div>
 
       <div className="spacer" />
 
-      <div className="card">
-        <h2>Money</h2>
-        <div className="row">
-          <div>
-            <p className="muted">Paid this week</p>
-            <p className="stat">£0</p>
-          </div>
-          <div>
-            <p className="muted">Unpaid</p>
-            <p className="stat">£0</p>
-          </div>
-        </div>
-      </div>
+      {jobs.length === 0 ? (
+        <p className="muted">No jobs booked for today.</p>
+      ) : (
+        jobs.map((j) => (
+          <Link
+            key={j.id}
+            href={`/jobs/${j.id}`}
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            <div className="card" style={{ marginBottom: 10 }}>
+              <div className="row">
+                <div>
+                  <strong>
+                    {j.customers
+                      ? `${j.customers.first_name} ${j.customers.last_name}`
+                      : "Job"}
+                  </strong>
+                  <div className="muted">
+                    {j.service_type}
+                    {j.customers?.postcode ? ` · ${j.customers.postcode}` : ""}
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div>{j.price != null ? `£${j.price}` : ""}</div>
+                  <div className="muted" style={{ fontSize: 12 }}>
+                    {statusLabel(j.status)}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </Link>
+        ))
+      )}
 
+      <Link href="/jobs/new">
+        <button type="button">+ Add job</button>
+      </Link>
+      <Link href="/jobs">
+        <button type="button" className="secondary">
+          All jobs
+        </button>
+      </Link>
       <Link href="/customers">
-        <button type="button">Customers</button>
+        <button type="button" className="secondary">
+          Customers
+        </button>
       </Link>
 
       <SignOutButton />

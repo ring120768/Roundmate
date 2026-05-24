@@ -18,7 +18,7 @@ The guiding test for any feature: **does it help the user save time, get paid fa
 - **Phase 1 (foundation) is DONE.** Supabase schema + RLS + Storage all live and verified (security advisor clean). Next.js app scaffolded, deployed to Vercel, and the full auth chain works end to end: sign up → log in → onboarding (create business) → dashboard, with RLS holding. Phase 1 exit criteria met.
 - **Railway intentionally deferred.** A Next.js app talks to Supabase directly, so no server is needed yet. Railway comes in later phases (Stripe webhooks, invoice PDFs, reminders). Not created.
 - **Frontend: Next.js** (mobile-first responsive web app, JavaScript + App Router). Lives in this folder. Hosted on Vercel free tier (move to Pro when it earns money).
-- **Next up: Phase 2** — customers and jobs (add/edit/list/search customers; jobs + daily list).
+- **Phase 2 largely built & deployed** — customers (list/add/edit/search + CSV import) and jobs (add/edit/list, today's list on the dashboard, manual status, book-from-customer) are live. Jobs are individual + date-only (round-based); auto-repeat from visit frequency is deliberately deferred to a later phase. Next: Phase 3 (job completion workflow → invoice).
 - **Accounts:** Supabase project exists (see below). GitHub repo + Vercel project live (see Deployment). Railway not created. Stripe is **not set up yet** (needed for Phase 5).
 
 ## Supabase project
@@ -69,7 +69,7 @@ Build money-first, AI last. The short version:
 11. Christmas lights CRM
 12. AI assistant
 
-The current target is steps 1–2 (Phase 1 foundation).
+Steps 1–4 are done (foundation + customers + jobs/daily list). Current target: step 5 — Job Complete checkbox + completion workflow (Phase 3).
 
 ## Core data model
 
