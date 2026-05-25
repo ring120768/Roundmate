@@ -43,6 +43,7 @@ The guiding test for any feature: **does it help the user save time, get paid fa
 - **Env vars** (set in Vercel project settings AND local `.env.local`): `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`. The secret service-role key is NOT in the repo or frontend.
 - **Supabase Auth:** email confirmation is currently OFF for MVP (signup → instant login). Re-enable with a real email provider in a later phase.
 - **Git note:** run git from Ringo's own Mac terminal, not from the sandbox — the sandbox can't remove `.git` lock files on the mounted folder, which leaves the repo wedged.
+- **Deploy workaround (2026-05-25):** `git push` to GitHub began failing with `remote: Internal Server Error` (HTTP 500) on a tiny push, with no GitHub-wide outage; HTTP/1.1 downgrade + larger postBuffer didn't help. Worked around by deploying **straight to Vercel with the CLI**: `vercel --prod` from the project folder (now linked to `ring120768-2588s-projects/pugsie-pa`). The push then succeeded on a later retry the same day — it was a transient GitHub 500, now resolved. Normal `git push` works again (and Vercel auto-deploys from `main`); `vercel --prod` remains a handy manual fallback. `.vercel/` is gitignored.
 
 ## Tech stack
 

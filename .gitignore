@@ -13,3 +13,4 @@
 
 # local env files (never commit secrets)
 .env*.local
+.vercel

@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { statusLabel, paymentLabel } from "@/lib/jobOptions";
+import SendEmailButtons from "@/components/SendEmailButtons";
 
 function Field({ label, value }) {
   return (
@@ -24,7 +25,7 @@ export default async function JobDetailPage({ params }) {
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("*, customers(id, first_name, last_name, postcode)")
+    .select("*, customers(id, first_name, last_name, postcode, email)")
     .eq("id", id)
     .single();
   if (!job) notFound();
@@ -75,6 +76,10 @@ export default async function JobDetailPage({ params }) {
           Edit job
         </button>
       </Link>
+
+      {job.status === "completed" && (
+        <SendEmailButtons jobId={id} hasEmail={Boolean(cust?.email)} />
+      )}
 
       {cust && (
         <Link href={`/customers/${cust.id}`} className="linklike">
