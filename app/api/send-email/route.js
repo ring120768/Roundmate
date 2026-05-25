@@ -14,7 +14,7 @@ export async function POST(request) {
   }
 
   const { jobId, type } = body || {};
-  if (!jobId || !["invoice", "receipt"].includes(type)) {
+  if (!jobId || !["invoice", "receipt", "confirmation"].includes(type)) {
     return NextResponse.json({ error: "Bad request" }, { status: 400 });
   }
 
@@ -82,12 +82,20 @@ export async function POST(request) {
        <p style="font-size:26px;font-weight:bold;margin:18px 0;">${amount}</p>
        <p>Please settle up at your convenience — just reply to this email if you have any questions.</p>`
     );
-  } else {
+  } else if (type === "receipt") {
     subject = `Payment received — thank you`;
     html = wrap(
       `<p>Hi ${firstName},</p>
        <p>Thank you — we've received your payment of <strong>${amount}</strong> for ${service} on ${dateLabel}.</p>
        <p>Much appreciated. See you next time.</p>`
+    );
+  } else {
+    // confirmation of the next visit
+    subject = `Your next window clean — ${dateLabel}`;
+    html = wrap(
+      `<p>Hi ${firstName},</p>
+       <p>Just to confirm, I'll be round on <strong>${dateLabel}</strong> to clean your windows.</p>
+       <p>If that day doesn't suit, just reply to this email and we'll rearrange.</p>`
     );
   }
 

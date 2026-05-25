@@ -21,16 +21,31 @@ export default function CompleteJobForm({ job }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Best-effort email send — completion still succeeds even if an email fails.
+  async function fireEmail(jobId, type) {
+    try {
+      await fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobId, type }),
+      });
+    } catch {
+      /* ignore */
+    }
+  }
+
   async function handleComplete(e) {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    const priceVal = price === "" ? null : Number(price);
+
     const updates = {
       status: "completed",
       completed_at: new Date().toISOString(),
       payment_status: outcome,
-      price: price === "" ? null : Number(price),
+      price: priceVal,
     };
     if (note.trim()) {
       updates.notes = job.notes ? `${job.notes}\n${note.trim()}` : note.trim();
@@ -46,13 +61,24 @@ export default function CompleteJobForm({ job }) {
       return;
     }
 
-    // Auto-book the next visit if asked.
+    // Auto-send the money email: invoice if unpaid, receipt if paid.
+    const moneyType =
+      outcome === "unpaid"
+        ? "invoice"
+        : outcome === "cash" || outcome === "bank"
+        ? "receipt"
+        : null;
+    if (moneyType) await fireEmail(job.id, moneyType);
+
+    // Auto-book the next visit and send its confirmation.
     if (bookNext && nextDate && customer?.id) {
+      const nextId = crypto.randomUUID();
       const { error: nextError } = await supabase.from("jobs").insert({
+        id: nextId,
         customer_id: customer.id,
         appointment_date: nextDate,
         service_type: job.service_type,
-        price: price === "" ? null : Number(price),
+        price: priceVal,
         status: "scheduled",
       });
       if (nextError) {
@@ -62,6 +88,7 @@ export default function CompleteJobForm({ job }) {
         );
         return;
       }
+      await fireEmail(nextId, "confirmation");
     }
 
     setLoading(false);
