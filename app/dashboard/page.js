@@ -99,6 +99,11 @@ export default async function DashboardPage() {
       <Link href="/jobs/new">
         <button type="button">+ Add job</button>
       </Link>
+      <Link href="/money">
+        <button type="button" className="btn-coral">
+          Money
+        </button>
+      </Link>
       <Link href="/jobs">
         <button type="button" className="btn-indigo">
           All jobs

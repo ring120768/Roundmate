@@ -21,6 +21,7 @@ The guiding test for any feature: **does it help the user save time, get paid fa
 - **Phase 2 largely built & deployed** — customers (list/add/edit/search + CSV import) and jobs (add/edit/list, today's list on the dashboard, manual status, book-from-customer) are live. Jobs are individual + date-only (round-based); auto-repeat from visit frequency is deliberately deferred to a later phase. There's also a Smart Rounds "Fill my round" page (`/rounds`) that groups nearby customers by postcode district for a chosen day.
 - **Phase 3 (job completion workflow) built & deployed** — the job detail page has a Complete flow (`/jobs/[id]/complete`): mark complete (sets `status` + `completed_at`), record payment outcome (cash / bank / unpaid / free) on `jobs.payment_status`, optional note, and auto-book the next visit (date suggested from the customer's visit frequency). NOT yet done: generating or sending an actual invoice/receipt — that's Phase 4 (needs an email provider). Next: Phase 4 (invoicing + unpaid dashboard + email setup).
 - **UI / branding:** mobile-first tidied-blue theme. A `Brand` component (`components/Brand.js`) shows the logo + "Pugsie PA" wordmark — big on `/login`, slim bar on app pages. The logo file is expected at `public/logo.png` (Ringo's window-cleaner caricature); if it's missing, Brand degrades to the wordmark only. There's a month **calendar** view at `/calendar` (client-side, fetches the visible month's jobs, tap a day to see/add jobs). The root `/` is a branded **landing splash** (logo + Enter → dashboard); login now redirects straight to `/dashboard`, which gates onboarding. Soft water + grape-bunch "suds" background lives in `public/suds.svg`. The app is an installable **PWA** (`public/manifest.json` + `icon-192/512` + `apple-touch-icon`, all generated from `logo.png`) so it can be added to a phone home screen and run standalone.
+- **Phase 4 (getting paid) — money view DONE.** `/money` shows Outstanding (completed jobs with `payment_status='unpaid'`) and Paid-this-week totals, with a "Mark paid" button (sets `payment_status='paid'`). Dashboard has a coral **Money** button. It's derived from job data — no `invoices` table records or email yet. STILL TO DO in Phase 4: set up an email provider (plan: **Resend** via a Next.js API route — keeps it serverless, no Railway), then formal invoice/receipt emails (which also unlock the deferred appointment-confirmation emails). VAT assumed off for now (Ringo not VAT-registered).
 - **Accounts:** Supabase project exists (see below). GitHub repo + Vercel project live (see Deployment). Railway not created. Stripe is **not set up yet** (needed for Phase 5).
 
 ## Supabase project
@@ -71,7 +72,7 @@ Build money-first, AI last. The short version:
 11. Christmas lights CRM
 12. AI assistant
 
-Steps 1–5 are done (foundation + customers + jobs/daily list + job completion). Current target: step 6 — invoice generation + cash/manual paid status + unpaid dashboard (Phase 4), which is also where we set up an email provider (used for both invoices and the deferred appointment-confirmation emails).
+Steps 1–5 done, plus the Phase 4 unpaid/paid "Money" dashboard. Current target: finish Phase 4 — set up email (Resend via a Next.js API route) and send invoice/receipt emails (also unlocks the appointment-confirmation emails). VAT deferred.
 
 ## Core data model
 

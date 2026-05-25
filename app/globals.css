@@ -203,8 +203,10 @@ button.secondary {
 .btn-green  { background: #eef6e2; color: #3b6d11; border: 1px solid #c0dd97; }
 .btn-amber  { background: #faeeda; color: #854f0b; border: 1px solid #fac775; }
 .btn-grey   { background: #f1efe8; color: #5f5e5a; border: 1px solid #d3d1c7; }
+.btn-coral  { background: #faece7; color: #993c1d; border: 1px solid #f5c4b3; }
 .btn-indigo:active,
 .btn-teal:active,
 .btn-green:active,
 .btn-amber:active,
-.btn-grey:active { filter: brightness(0.97); }
+.btn-grey:active,
+.btn-coral:active { filter: brightness(0.97); }
