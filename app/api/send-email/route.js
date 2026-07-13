@@ -106,7 +106,7 @@ export async function POST(request) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: `${businessName} <onboarding@resend.dev>`,
+      from: `${businessName} <hello@roundmate.co.uk>`,
       to: [cust.email],
       reply_to: user.email,
       subject,

@@ -447,6 +447,10 @@ Make Pugsie PA more automated and scalable.
 - Staff/team assignment
 - Reporting dashboard
 
+### Note on teams, rotas and payroll (2026-07-10)
+
+For larger traders: build rotas/job assignment in-app (assign jobs/rounds to staff, per-worker day lists — this is where paid team tiers come from; staff are extra `profiles` on the same `business_id`). Do NOT build payroll — UK payroll (HMRC RTI, pensions auto-enrolment) is a regulated product; integrate/export instead (hours, jobs and revenue per worker to accountant/Xero). Many workers in these trades are self-employed subbies paid a share of the round, so subbie-split reporting matters more than PAYE.
+
 ### Exit Criteria
 
 - App can support more serious operators and small teams
@@ -603,6 +607,16 @@ Mitigation:
 - Minimise typing
 - Use defaults
 - Auto-create next steps after job completion
+
+## Future Direction — Multi-Trade Expansion (noted 2026-07-10)
+
+The core loop (customer → job → complete → invoice → payment → next visit) is trade-agnostic. Once proven with window cleaners, the same app suits landscapers, gardeners, ironing services, domestic cleaners, and similar round-based local trades. Expansion is mostly copy, onboarding ("What trade are you?"), and terminology — not a rebuild.
+
+**Bolt-on pattern:** Christmas lights is the window-cleaner bolt-on — seasonal, high-value, repeat-annual work layered on the core loop. Other trades will have their own equivalents (e.g. gardeners: spring tidy-ups, hedge cutting season; landscapers: quoting/project work; cleaners: end-of-tenancy deep cleans). Some of these bolt-ons will need deeper trade knowledge or smarter logic (quoting, seasonality rules, materials) — that's where the AI layer and specialist knowledge access earn their keep. Design the seasonal_services concept generically so Christmas lights becomes the first instance of a reusable pattern, not a one-off.
+
+**Decision — customer self-booking (Calendly etc.): rejected.** These businesses are round-based; the tradesman controls the schedule, so slot-picking fights Smart Rounds. If customer-initiated booking is ever wanted, it should be a lightweight "request a visit" link that lands as a pending job — later phase, if at all.
+
+**Rule:** don't broaden until window cleaners are using it daily and paying. One niche first.
 
 ## Final Roadmap Principle
 

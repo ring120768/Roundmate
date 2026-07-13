@@ -1,10 +1,6 @@
-# CLAUDE.md — Pugsie PA
+# AGENTS.md — Pugsie PA
 
-This file orients Claude at the start of every session in this project. Read it first.
-
-> **Rename in progress (2026-07-10):** the product is being renamed **RoundMate** for launch ("Pugsie PA" was a working title after Ringo's mate). No software product named RoundMate found (nearest: RoundPartner, Manage My Round — different names). App rebrand (Brand component, manifest, wordmark) to follow gradually; Pugsie caricature may stay as mascot. Code/repo/table names unchanged.
->
-> **Domain live (2026-07-13):** roundmate.co.uk bought at Hostinger and **verified in Resend** (sending only; receiving off) on a NEW separate Resend account (ian.ring@sky.com — kept separate from the accident-app account to avoid the £20/mo second-domain upgrade and share no sending reputation). `send-email/route.js` updated to send from `hello@roundmate.co.uk`. STILL TO DO to go live: create API key in the new Resend account → replace `RESEND_API_KEY` in Vercel env + `.env.local` → git push from Ringo's Mac → test invoice to own inbox (check SPF/DKIM pass). Also pending: point roundmate.co.uk at the Vercel app (A record 76.76.21.21 + www CNAME).
+This file orients Codex at the start of every session in this project. Read it first.
 
 ## What this is
 
@@ -91,7 +87,6 @@ Initial Supabase tables: `businesses`, `profiles`, `customers`, `jobs`, `invoice
 - Start simple: email before SMS/WhatsApp, `.ics` before calendar sync, postcode grouping before route optimisation.
 - Don't overbuild the AI layer before the core admin workflow works.
 - Keep solutions simple and practical — don't over-engineer. Build the smallest thing that delivers the value, then iterate.
-- **Two-way, one-tap (agreed 2026-07-10):** customer interaction is a two-way street, but traditional on the surface and modern underneath. Customers get email in the tradesman's own name — no accounts, no downloads, no portals. Every customer-facing message carries exactly ONE useful tap (confirm visit / pay / add to calendar / request a visit, on the tradesman's rails). Ease on the customer side is how our users win work; "your customers will think you're the most professional trade they deal with" is part of the pitch.
 
 ## How to work with Ringo
 
@@ -118,3 +113,38 @@ A few decisions are deferred until they're actually needed, so we don't block th
 - GoCardless planned from day one for repeat customers, or Stripe-only first?
 
 Surface these when the relevant phase comes up — don't pre-solve them.
+
+## Imported Claude Cowork project instructions
+
+**Pugsie PA** is a simple admin assistant app for window cleaners and local service businesses.
+
+It helps them manage:
+
+* Customers
+* Appointments
+* Invoices
+* Payments
+* Repeat bookings
+* Route planning
+* Seasonal work like Christmas lights
+
+The core workflow is:
+
+> **Finish the job → tick complete → send invoice → confirm cash or send payment link → book next visit → send calendar invite.**
+
+The app solves the messy admin problem by making sure jobs are recorded, customers are reminded, invoices are sent, payments are chased, and repeat appointments are not forgotten.
+
+It also includes a **Smart Rounds Assistant** to group jobs by postcode or area, helping reduce driving time and fuel costs.
+
+For Christmas lights, it tracks previous customers and sends reminders in October/November to encourage repeat bookings.
+
+The planned tech setup is:
+
+* **Supabase** for customer, job, invoice and payment data
+* **Railway** for automations, reminders, payment webhooks and backend logic
+* **Stripe** for payment links
+* Calendar invites for appointment confirmation
+
+In simple terms:
+
+> **Pugsie PA helps tradespeople spend less time on admin, get paid faster, and organise their work better.**
