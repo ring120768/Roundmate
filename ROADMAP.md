@@ -618,6 +618,18 @@ The core loop (customer → job → complete → invoice → payment → next vi
 
 **Rule:** don't broaden until window cleaners are using it daily and paying. One niche first.
 
+## Commercial Launch Plan (added 2026-07-21)
+
+**Sequencing rule: finish the money loop first** (domain live → test invoice → payment reminders → Stripe payment links). The app must collect money for tradesmen before it asks tradesmen for money.
+
+**Pricing (informed by RESEARCH-cross-pollination.md competitor scan):** market sits at Aworka £10–12, Squeegee £16+, CleanerPlanner £30, Jobber $39+. Land at ONE simple solo plan **£12/mo or £99/yr**, 30-day free trial, no card upfront. Founding-member deal **£8/mo for the first 25–50 users** — pitched as "founding price, kept while you stay subscribed" (Ringo's call 2026-07-21: do NOT promise "forever" — hollow if the business folds; keep the wording honest and time-bound to the subscription). Recruit via window-cleaning Facebook groups/forums. Paul free (user zero + case study). **Mate's OK on using his likeness for the mascot: DONE (confirmed 2026-07-21).** Team tier later (rotas/job assignment — see Phase 11 note); payroll never (integrate/export instead). Billing = Stripe Billing subscriptions — separate from and AFTER Phase 5 payment links.
+
+**Launch checklist (unglamorous but required before charging strangers):** terms + privacy policy (UK GDPR — we hold their customers' personal data), support email on roundmate.co.uk, verified Supabase backups, marketing landing page at roundmate.co.uk with app at app.roundmate.co.uk, pitch copy ("Finish the job. Tap complete. Everything else is sorted.").
+
+**UI/UX polish pass:** mobile-first audit of the daily loop (dashboard → job → complete), bigger touch targets, faster perceived loads, consistent empty states; keep checkbox-led, minimal typing.
+
+**Trade-personalised mascot:** same caricature character re-drawn per trade (squeegee / hedge trimmer / valet sponge / oven gloves), selected automatically by a "What's your trade?" onboarding question — which is also the first building block of multi-trade expansion. Generate variants from the existing logo as reference. NOTE: character is based on Ringo's mate — get his explicit OK before commercial use of his likeness.
+
 ## Final Roadmap Principle
 
 Build around money first:
