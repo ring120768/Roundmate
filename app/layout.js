@@ -1,12 +1,12 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "Pugsie PA",
+  title: "RoundMate",
   description: "Your admin assistant for jobs, invoices and payments.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    title: "Pugsie PA",
+    title: "RoundMate",
     statusBarStyle: "default",
   },
   icons: {
