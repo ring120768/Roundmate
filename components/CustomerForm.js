@@ -113,6 +113,8 @@ export default function CustomerForm({ initial = null, customerId = null }) {
           <option>Every 4 weeks</option>
           <option>Every 8 weeks</option>
           <option>Every 12 weeks</option>
+          <option>Every 6 months</option>
+          <option>Every 12 months</option>
           <option>One-off</option>
         </select>
 
