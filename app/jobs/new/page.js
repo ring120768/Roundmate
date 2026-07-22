@@ -14,6 +14,13 @@ export default async function NewJobPage({ searchParams }) {
     .select("id, first_name, last_name, postcode, default_price")
     .order("first_name", { ascending: true });
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("businesses(trade)")
+    .eq("id", user.id)
+    .single();
+  const trade = profile?.businesses?.trade ?? null;
+
   const preselect = searchParams?.customer ?? "";
   const preselectDate = searchParams?.date ?? "";
 
@@ -25,6 +32,7 @@ export default async function NewJobPage({ searchParams }) {
         customers={customers ?? []}
         preselectedCustomerId={preselect}
         preselectedDate={preselectDate}
+        trade={trade}
       />
     </div>
   );

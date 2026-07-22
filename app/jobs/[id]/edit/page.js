@@ -18,11 +18,18 @@ export default async function EditJobPage({ params }) {
     .select("id, first_name, last_name, postcode, default_price")
     .order("first_name", { ascending: true });
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("businesses(trade)")
+    .eq("id", user.id)
+    .single();
+  const trade = profile?.businesses?.trade ?? null;
+
   return (
     <div className="container">
       <h1>Edit job</h1>
       <div className="spacer" />
-      <JobForm customers={customers ?? []} initial={job} jobId={id} />
+      <JobForm customers={customers ?? []} initial={job} jobId={id} trade={trade} />
     </div>
   );
 }

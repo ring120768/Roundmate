@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { SERVICE_TYPES, JOB_STATUSES } from "@/lib/jobOptions";
+import { JOB_STATUSES } from "@/lib/jobOptions";
+import { servicesForTrade } from "@/lib/trades";
 
 // Today's date as YYYY-MM-DD in the user's local time.
 function todayISO() {
@@ -24,7 +25,9 @@ export default function JobForm({
   jobId = null,
   preselectedCustomerId = "",
   preselectedDate = "",
+  trade = null,
 }) {
+  const serviceTypes = servicesForTrade(trade);
   const router = useRouter();
   const supabase = createClient();
 
@@ -45,7 +48,7 @@ export default function JobForm({
     appointment_date: initial?.appointment_date ?? (preselectedDate || todayISO()),
     // DB stores "HH:MM:SS"; the time input wants "HH:MM".
     start_time: initial?.start_time ? initial.start_time.slice(0, 5) : "",
-    service_type: initial?.service_type ?? "Window cleaning",
+    service_type: initial?.service_type ?? serviceTypes[0],
     price: startPrice ?? "",
     status: initial?.status ?? "scheduled",
     notes: initial?.notes ?? "",
@@ -247,7 +250,12 @@ export default function JobForm({
 
         <label htmlFor="service_type">Service</label>
         <select id="service_type" value={form.service_type} onChange={set("service_type")}>
-          {SERVICE_TYPES.map((s) => (
+          {/* Keep an edited job's existing service even if it's not on the
+              current trade's menu. */}
+          {initial?.service_type && !serviceTypes.includes(initial.service_type) && (
+            <option value={initial.service_type}>{initial.service_type}</option>
+          )}
+          {serviceTypes.map((s) => (
             <option key={s}>{s}</option>
           ))}
         </select>

@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { TRADES, DEFAULT_TRADE } from "@/lib/trades";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -11,8 +12,19 @@ export default function OnboardingPage() {
   const [name, setName] = useState("");
   const [ownerName, setOwnerName] = useState("");
   const [phone, setPhone] = useState("");
+  const [trade, setTrade] = useState(DEFAULT_TRADE);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // If they picked their trade on the landing page, carry it through.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("rm_trade");
+      if (saved && TRADES.some((t) => t.key === saved)) setTrade(saved);
+    } catch {
+      // localStorage unavailable — keep the default.
+    }
+  }, []);
 
   async function handleCreate(e) {
     e.preventDefault();
@@ -38,6 +50,7 @@ export default function OnboardingPage() {
       name,
       owner_name: ownerName,
       phone,
+      trade,
     });
 
     if (insertError) {
@@ -73,12 +86,26 @@ export default function OnboardingPage() {
 
       <div className="card">
         <form onSubmit={handleCreate}>
+          <label htmlFor="trade">Your trade</label>
+          <select
+            id="trade"
+            value={trade}
+            onChange={(e) => setTrade(e.target.value)}
+            required
+          >
+            {TRADES.map((t) => (
+              <option key={t.key} value={t.key}>
+                {t.label}
+              </option>
+            ))}
+          </select>
+
           <label htmlFor="name">Business name</label>
           <input
             id="name"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="e.g. Ringo's Window Cleaning"
+            placeholder="e.g. Ringo's Cleaning"
             required
           />
 

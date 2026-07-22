@@ -54,7 +54,7 @@ export async function POST(request) {
     );
   }
 
-  const businessName = job.businesses?.name || "Your window cleaner";
+  const businessName = job.businesses?.name || "Your local service";
   const firstName = cust.first_name || "there";
   const service = job.service_type || "your visit";
   const amount = job.price != null ? `£${job.price}` : "";
@@ -92,10 +92,10 @@ export async function POST(request) {
   } else {
     // confirmation of the next visit
     const timeLabel = job.start_time ? ` at ${job.start_time.slice(0, 5)}` : "";
-    subject = `Your next window clean — ${dateLabel}`;
+    subject = `Your next visit — ${dateLabel}`;
     html = wrap(
       `<p>Hi ${firstName},</p>
-       <p>Just to confirm, I'll be round on <strong>${dateLabel}${timeLabel}</strong> to clean your windows.</p>
+       <p>Just to confirm, I'll be round on <strong>${dateLabel}${timeLabel}</strong> for: <strong>${service}</strong>.</p>
        <p>If that day doesn't suit, just reply to this email and we'll rearrange.</p>`
     );
   }
