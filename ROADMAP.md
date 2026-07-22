@@ -628,6 +628,8 @@ The core loop (customer → job → complete → invoice → payment → next vi
 
 **UI/UX polish pass:** mobile-first audit of the daily loop (dashboard → job → complete), bigger touch targets, faster perceived loads, consistent empty states; keep checkbox-led, minimal typing.
 
+**Native app shell — COMMITTED (Ringo, 2026-07-21), sequenced after the money loop (reminders + Stripe links):** wrap the existing Next.js app in Capacitor for App Store + Google Play listings and native iPhone contact picking (web apps cannot read iOS contacts — platform restriction; Android web already has the Contact Picker, live on /customers/import). Rationale: "download RoundMate from the App Store" is the low-friction pitch tradesmen need, and app-store presence = trust for the founding-member push. Scope: Capacitor shell, native contacts plugin feeding the existing import pipeline, icons/splash from Pugsie artwork, Apple review (Ringo may already have an Apple Developer account from the accident app — verify). ~A week of sessions incl. review round-trips. Until then, iPhone route = .vcf share-a-contact (built, live).
+
 **Trade-personalised mascot:** same caricature character re-drawn per trade (squeegee / hedge trimmer / valet sponge / oven gloves), selected automatically by a "What's your trade?" onboarding question — which is also the first building block of multi-trade expansion. Generate variants from the existing logo as reference. NOTE: character is based on Ringo's mate — get his explicit OK before commercial use of his likeness.
 
 ## Final Roadmap Principle

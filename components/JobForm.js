@@ -14,6 +14,9 @@ function todayISO() {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+// Sentinel value for the "add a brand-new customer" choice in the dropdown.
+const NEW_CUSTOMER = "__new__";
+
 // One form for both adding and editing a job.
 export default function JobForm({
   customers = [],
@@ -25,8 +28,12 @@ export default function JobForm({
   const router = useRouter();
   const supabase = createClient();
 
+  // With no customers yet, drop straight into new-customer mode instead of
+  // bouncing the user off to another page.
   const startCustomerId = initial?.customer_id ?? preselectedCustomerId ?? "";
-  const startCustomer = customers.find((c) => c.id === startCustomerId);
+  const effectiveStartId =
+    !startCustomerId && customers.length === 0 ? NEW_CUSTOMER : startCustomerId;
+  const startCustomer = customers.find((c) => c.id === effectiveStartId);
   const startPrice =
     initial?.price ??
     (startCustomer && startCustomer.default_price != null
@@ -34,17 +41,30 @@ export default function JobForm({
       : "");
 
   const [form, setForm] = useState({
-    customer_id: startCustomerId,
+    customer_id: effectiveStartId,
     appointment_date: initial?.appointment_date ?? (preselectedDate || todayISO()),
     service_type: initial?.service_type ?? "Window cleaning",
     price: startPrice ?? "",
     status: initial?.status ?? "scheduled",
     notes: initial?.notes ?? "",
   });
+  const [newCust, setNewCust] = useState({
+    first_name: "",
+    last_name: "",
+    address_line_1: "",
+    town_city: "",
+    postcode: "",
+    phone: "",
+    email: "",
+  });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+  const setNew = (field) => (e) =>
+    setNewCust({ ...newCust, [field]: e.target.value });
+
+  const addingNew = form.customer_id === NEW_CUSTOMER;
 
   // Picking a customer fills in their default price.
   function onCustomerChange(e) {
@@ -64,11 +84,44 @@ export default function JobForm({
       setError("Please choose a customer.");
       return;
     }
+    if (addingNew && !newCust.first_name.trim()) {
+      setError("The new customer needs at least a first name.");
+      return;
+    }
     setLoading(true);
     setError("");
 
+    let customerId = form.customer_id;
+
+    // Create the customer first if this is a brand-new one. The job's price
+    // doubles as their default price, so their next booking prefills itself.
+    if (addingNew) {
+      const clean = (v) => (v && v.trim() !== "" ? v.trim() : null);
+      const { data: created, error: custErr } = await supabase
+        .from("customers")
+        .insert({
+          first_name: clean(newCust.first_name),
+          last_name: clean(newCust.last_name),
+          address_line_1: clean(newCust.address_line_1),
+          town_city: clean(newCust.town_city),
+          postcode: clean(newCust.postcode),
+          phone: clean(newCust.phone),
+          email: clean(newCust.email),
+          default_price: form.price === "" ? null : Number(form.price),
+        })
+        .select("id")
+        .single();
+
+      if (custErr) {
+        setLoading(false);
+        setError(custErr.message);
+        return;
+      }
+      customerId = created.id;
+    }
+
     const payload = {
-      customer_id: form.customer_id,
+      customer_id: customerId,
       appointment_date: form.appointment_date || null,
       service_type: form.service_type || null,
       price: form.price === "" ? null : Number(form.price),
@@ -94,17 +147,6 @@ export default function JobForm({
     router.refresh();
   }
 
-  if (customers.length === 0) {
-    return (
-      <div className="card">
-        <p>You need a customer before you can book a job.</p>
-        <Link href="/customers/new">
-          <button type="button">Add a customer first</button>
-        </Link>
-      </div>
-    );
-  }
-
   return (
     <div className="card">
       <form onSubmit={handleSubmit}>
@@ -116,6 +158,7 @@ export default function JobForm({
           required
         >
           <option value="">— Choose customer —</option>
+          <option value={NEW_CUSTOMER}>+ Add new customer</option>
           {customers.map((c) => (
             <option key={c.id} value={c.id}>
               {c.first_name} {c.last_name}
@@ -123,6 +166,64 @@ export default function JobForm({
             </option>
           ))}
         </select>
+
+        {addingNew && (
+          <>
+            <label htmlFor="nc_first_name">First name</label>
+            <input
+              id="nc_first_name"
+              value={newCust.first_name}
+              onChange={setNew("first_name")}
+              required
+            />
+
+            <label htmlFor="nc_last_name">Last name</label>
+            <input
+              id="nc_last_name"
+              value={newCust.last_name}
+              onChange={setNew("last_name")}
+            />
+
+            <label htmlFor="nc_address_line_1">Address</label>
+            <input
+              id="nc_address_line_1"
+              value={newCust.address_line_1}
+              onChange={setNew("address_line_1")}
+              placeholder="12 High Street"
+            />
+
+            <label htmlFor="nc_town_city">Town</label>
+            <input
+              id="nc_town_city"
+              value={newCust.town_city}
+              onChange={setNew("town_city")}
+            />
+
+            <label htmlFor="nc_postcode">Postcode</label>
+            <input
+              id="nc_postcode"
+              value={newCust.postcode}
+              onChange={setNew("postcode")}
+              placeholder="CM1 1AA"
+            />
+
+            <label htmlFor="nc_phone">Phone</label>
+            <input
+              id="nc_phone"
+              type="tel"
+              value={newCust.phone}
+              onChange={setNew("phone")}
+            />
+
+            <label htmlFor="nc_email">Email</label>
+            <input
+              id="nc_email"
+              type="email"
+              value={newCust.email}
+              onChange={setNew("email")}
+            />
+          </>
+        )}
 
         <label htmlFor="appointment_date">Date</label>
         <input
@@ -169,7 +270,13 @@ export default function JobForm({
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Saving…" : jobId ? "Save changes" : "Add job"}
+          {loading
+            ? "Saving…"
+            : jobId
+            ? "Save changes"
+            : addingNew
+            ? "Add customer + job"
+            : "Add job"}
         </button>
         {error && <p className="error">{error}</p>}
       </form>
