@@ -48,6 +48,9 @@ export default async function JobDetailPage({ params }) {
 
       <div className="card">
         <Field label="Date" value={dateLabel} />
+        {job.start_time && (
+          <Field label="Time" value={job.start_time.slice(0, 5)} />
+        )}
         <Field label="Price" value={job.price != null ? `£${job.price}` : null} />
         <Field label="Status" value={statusLabel(job.status)} />
         {job.payment_status && (

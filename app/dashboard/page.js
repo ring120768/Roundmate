@@ -29,8 +29,9 @@ export default async function DashboardPage() {
   });
   const { data: todaysJobs } = await supabase
     .from("jobs")
-    .select("id, service_type, price, status, customers(first_name, last_name, postcode)")
+    .select("id, service_type, price, status, start_time, customers(first_name, last_name, postcode)")
     .eq("appointment_date", today)
+    .order("start_time", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true });
 
   const jobs = todaysJobs ?? [];
@@ -80,6 +81,7 @@ export default async function DashboardPage() {
                       : "Job"}
                   </strong>
                   <div className="muted">
+                    {j.start_time ? `${j.start_time.slice(0, 5)} · ` : ""}
                     {j.service_type}
                     {j.customers?.postcode ? ` · ${j.customers.postcode}` : ""}
                   </div>

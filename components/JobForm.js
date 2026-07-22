@@ -43,6 +43,8 @@ export default function JobForm({
   const [form, setForm] = useState({
     customer_id: effectiveStartId,
     appointment_date: initial?.appointment_date ?? (preselectedDate || todayISO()),
+    // DB stores "HH:MM:SS"; the time input wants "HH:MM".
+    start_time: initial?.start_time ? initial.start_time.slice(0, 5) : "",
     service_type: initial?.service_type ?? "Window cleaning",
     price: startPrice ?? "",
     status: initial?.status ?? "scheduled",
@@ -123,6 +125,7 @@ export default function JobForm({
     const payload = {
       customer_id: customerId,
       appointment_date: form.appointment_date || null,
+      start_time: form.start_time || null,
       service_type: form.service_type || null,
       price: form.price === "" ? null : Number(form.price),
       status: form.status || "scheduled",
@@ -232,6 +235,14 @@ export default function JobForm({
           value={form.appointment_date}
           onChange={set("appointment_date")}
           required
+        />
+
+        <label htmlFor="start_time">Time (optional)</label>
+        <input
+          id="start_time"
+          type="time"
+          value={form.start_time}
+          onChange={set("start_time")}
         />
 
         <label htmlFor="service_type">Service</label>

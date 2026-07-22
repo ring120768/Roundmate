@@ -39,10 +39,11 @@ export default async function JobsPage() {
   const { data: jobs } = await supabase
     .from("jobs")
     .select(
-      "id, appointment_date, service_type, price, status, customers(first_name, last_name, postcode)"
+      "id, appointment_date, start_time, service_type, price, status, customers(first_name, last_name, postcode)"
     )
     .gte("appointment_date", today)
     .order("appointment_date", { ascending: true })
+    .order("start_time", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true });
 
   // Group jobs by their date.
@@ -86,6 +87,7 @@ export default async function JobsPage() {
                           : "Job"}
                       </strong>
                       <div className="muted">
+                        {j.start_time ? `${j.start_time.slice(0, 5)} · ` : ""}
                         {j.service_type}
                         {j.customers?.postcode ? ` · ${j.customers.postcode}` : ""}
                       </div>

@@ -37,7 +37,7 @@ export async function POST(request) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, service_type, price, appointment_date, customers(id, first_name, last_name, email), businesses(name)"
+      "id, service_type, price, appointment_date, start_time, customers(id, first_name, last_name, email), businesses(name)"
     )
     .eq("id", jobId)
     .single();
@@ -91,10 +91,11 @@ export async function POST(request) {
     );
   } else {
     // confirmation of the next visit
+    const timeLabel = job.start_time ? ` at ${job.start_time.slice(0, 5)}` : "";
     subject = `Your next window clean — ${dateLabel}`;
     html = wrap(
       `<p>Hi ${firstName},</p>
-       <p>Just to confirm, I'll be round on <strong>${dateLabel}</strong> to clean your windows.</p>
+       <p>Just to confirm, I'll be round on <strong>${dateLabel}${timeLabel}</strong> to clean your windows.</p>
        <p>If that day doesn't suit, just reply to this email and we'll rearrange.</p>`
     );
   }
