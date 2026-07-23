@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import SignOutButton from "@/components/SignOutButton";
 import Brand from "@/components/Brand";
+import TradeQuickSwitch from "@/components/TradeQuickSwitch";
 import { statusLabel } from "@/lib/jobOptions";
 
 export default async function DashboardPage() {
@@ -15,7 +16,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, business_id, businesses(name)")
+    .select("full_name, business_id, businesses(name, trade)")
     .eq("id", user.id)
     .single();
   if (!profile?.business_id) redirect("/onboarding");
@@ -146,6 +147,8 @@ export default async function DashboardPage() {
           </button>
         </Link>
       </div>
+
+      <TradeQuickSwitch currentTrade={profile.businesses?.trade ?? null} />
 
       <SignOutButton />
     </div>

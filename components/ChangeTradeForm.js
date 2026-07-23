@@ -5,13 +5,19 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import TradeGrid from "@/components/TradeGrid";
-import { tradeLabel } from "@/lib/trades";
+import { TRADES, tradeLabel } from "@/lib/trades";
 
-export default function ChangeTradeForm({ business }) {
+export default function ChangeTradeForm({ business, preselect = null }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const [trade, setTrade] = useState(business?.trade ?? "window_cleaning");
+  // A ?to=<trade> in the URL (from the dashboard shortcut) preselects it.
+  const validPreselect = TRADES.some((t) => t.key === preselect)
+    ? preselect
+    : null;
+  const [trade, setTrade] = useState(
+    validPreselect ?? business?.trade ?? "window_cleaning"
+  );
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(false);

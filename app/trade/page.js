@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Brand from "@/components/Brand";
 import ChangeTradeForm from "@/components/ChangeTradeForm";
 
-export default async function ChangeTradePage() {
+export default async function ChangeTradePage({ searchParams }) {
   const supabase = createClient();
   const {
     data: { user },
@@ -23,7 +23,10 @@ export default async function ChangeTradePage() {
       <h1>Change trade</h1>
       <p className="muted">Pick the trade your business works in.</p>
       <div className="spacer" />
-      <ChangeTradeForm business={profile.businesses} />
+      <ChangeTradeForm
+        business={profile.businesses}
+        preselect={searchParams?.to ?? null}
+      />
     </div>
   );
 }
