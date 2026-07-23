@@ -170,6 +170,13 @@ export default function Calendar() {
       <Link href={`/jobs/new?date=${selected}`}>
         <button type="button">+ Add job on this day</button>
       </Link>
+      {selectedJobs.length >= 2 && (
+        <Link href={`/rounds?date=${selected}`}>
+          <button type="button" className="btn-green">
+            🗺️ Order my route for this day
+          </button>
+        </Link>
+      )}
     </div>
   );
 }

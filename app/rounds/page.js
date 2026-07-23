@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import DayPicker from "@/components/DayPicker";
+import RouteOptimizer from "@/components/RouteOptimizer";
 
 function ukToday() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
@@ -92,6 +93,9 @@ export default async function RoundsPage({ searchParams }) {
           </p>
         )}
       </div>
+
+      <div className="spacer" />
+      <RouteOptimizer date={date} />
 
       {districts.size > 0 && (
         <>

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { JOB_STATUSES } from "@/lib/jobOptions";
 import { servicesForTrade } from "@/lib/trades";
+import { geocodePostcode } from "@/lib/geocode";
 
 // Today's date as YYYY-MM-DD in the user's local time.
 function todayISO() {
@@ -102,9 +103,15 @@ export default function JobForm({
     // doubles as their default price, so their next booking prefills itself.
     if (addingNew) {
       const clean = (v) => (v && v.trim() !== "" ? v.trim() : null);
+      // Free best-effort geocode so the new customer joins route ordering.
+      const coords = clean(newCust.postcode)
+        ? await geocodePostcode(newCust.postcode)
+        : null;
       const { data: created, error: custErr } = await supabase
         .from("customers")
         .insert({
+          latitude: coords?.latitude ?? null,
+          longitude: coords?.longitude ?? null,
           first_name: clean(newCust.first_name),
           last_name: clean(newCust.last_name),
           address_line_1: clean(newCust.address_line_1),

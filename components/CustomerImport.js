@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Papa from "papaparse";
 import { createClient } from "@/lib/supabase/client";
+import { geocodePostcodes, normalisePostcode } from "@/lib/geocode";
 
 // The columns we understand. The CSV's headers are matched to these
 // (case-insensitive, spaces -> underscores), so "First Name" maps to first_name.
@@ -221,10 +222,19 @@ export default function CustomerImport() {
     setError("");
     setStatus("");
 
+    // Geocode all postcodes in bulk (free, best-effort) for route ordering.
+    const coordsByPostcode = await geocodePostcodes(
+      rows.map((r) => r.postcode)
+    );
+    const rowsWithCoords = rows.map((r) => {
+      const c = coordsByPostcode.get(normalisePostcode(r.postcode));
+      return c ? { ...r, latitude: c.latitude, longitude: c.longitude } : r;
+    });
+
     const chunkSize = 200;
     let inserted = 0;
-    for (let i = 0; i < rows.length; i += chunkSize) {
-      const chunk = rows.slice(i, i + chunkSize);
+    for (let i = 0; i < rowsWithCoords.length; i += chunkSize) {
+      const chunk = rowsWithCoords.slice(i, i + chunkSize);
       // business_id is auto-filled by the database default.
       const { error } = await supabase.from("customers").insert(chunk);
       if (error) {

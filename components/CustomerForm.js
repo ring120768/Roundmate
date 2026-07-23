@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { geocodePostcode } from "@/lib/geocode";
 
 // One form used for both adding and editing a customer.
 // Pass `initial` + `customerId` to edit; pass nothing to add a new one.
@@ -46,6 +47,16 @@ export default function CustomerForm({ initial = null, customerId = null }) {
       visit_frequency: form.visit_frequency || null,
       access_notes: form.access_notes || null,
     };
+
+    // Geocode the postcode (free, best-effort) so route ordering works.
+    // Re-geocode on edit only if the postcode changed.
+    if (payload.postcode && payload.postcode !== (initial?.postcode ?? null)) {
+      const coords = await geocodePostcode(payload.postcode);
+      if (coords) {
+        payload.latitude = coords.latitude;
+        payload.longitude = coords.longitude;
+      }
+    }
 
     let result;
     if (customerId) {
