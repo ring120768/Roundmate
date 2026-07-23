@@ -10,15 +10,17 @@ export default function Brand({ variant = "bar" }) {
   const [imgOk, setImgOk] = useState(true);
 
   if (variant === "hero" || variant === "landing") {
-    const imgClass = variant === "landing" ? "brand-landing-img" : "brand-hero-img";
+    // The landing page shows the pug trade cards instead of the big logo,
+    // so it gets wordmark-only. The login page (hero) keeps the logo.
+    const showLogo = variant !== "landing";
     return (
       <div className="brand-hero">
-        {imgOk && (
+        {showLogo && imgOk && (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src="/logo.png"
             alt="RoundMate"
-            className={imgClass}
+            className="brand-hero-img"
             onError={() => setImgOk(false)}
           />
         )}
