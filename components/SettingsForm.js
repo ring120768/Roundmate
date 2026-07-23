@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { TRADES } from "@/lib/trades";
+import TradeGrid from "@/components/TradeGrid";
 
 export default function SettingsForm({ business, userId }) {
   const router = useRouter();
@@ -75,14 +75,14 @@ export default function SettingsForm({ business, userId }) {
         <label htmlFor="s_phone">Phone</label>
         <input id="s_phone" type="tel" value={form.phone} onChange={set("phone")} />
 
-        <label htmlFor="s_trade">Trade</label>
-        <select id="s_trade" value={form.trade} onChange={set("trade")}>
-          {TRADES.map((t) => (
-            <option key={t.key} value={t.key}>
-              {t.label}
-            </option>
-          ))}
-        </select>
+        <label>Trade</label>
+        <TradeGrid
+          value={form.trade}
+          onChange={(key) => {
+            setStatus("");
+            setForm((f) => ({ ...f, trade: key }));
+          }}
+        />
         <p className="muted" style={{ fontSize: 13 }}>
           Changing trade changes the service list on new jobs. Existing jobs
           and customers are untouched.

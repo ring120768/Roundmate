@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { TRADES, DEFAULT_TRADE } from "@/lib/trades";
+import TradeGrid from "@/components/TradeGrid";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -86,19 +87,8 @@ export default function OnboardingPage() {
 
       <div className="card">
         <form onSubmit={handleCreate}>
-          <label htmlFor="trade">Your trade</label>
-          <select
-            id="trade"
-            value={trade}
-            onChange={(e) => setTrade(e.target.value)}
-            required
-          >
-            {TRADES.map((t) => (
-              <option key={t.key} value={t.key}>
-                {t.label}
-              </option>
-            ))}
-          </select>
+          <label>Your trade</label>
+          <TradeGrid value={trade} onChange={setTrade} />
 
           <label htmlFor="name">Business name</label>
           <input

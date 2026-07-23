@@ -101,36 +101,45 @@ export default async function DashboardPage() {
       <Link href="/jobs/new">
         <button type="button">+ Add job</button>
       </Link>
-      <Link href="/money">
-        <button type="button" className="btn-coral">
-          Money
-        </button>
-      </Link>
-      <Link href="/jobs">
-        <button type="button" className="btn-indigo">
-          All jobs
-        </button>
-      </Link>
-      <Link href="/calendar">
-        <button type="button" className="btn-teal">
-          Calendar
-        </button>
-      </Link>
-      <Link href="/rounds">
-        <button type="button" className="btn-green">
-          Fill my round
-        </button>
-      </Link>
-      <Link href="/customers">
-        <button type="button" className="btn-amber">
-          Customers
-        </button>
-      </Link>
-      <Link href="/settings">
-        <button type="button" className="secondary">
-          Settings
-        </button>
-      </Link>
+
+      <div className="tile-grid">
+        <Link href="/money">
+          <button type="button" className="btn-coral">
+            <span className="tile-icon" aria-hidden="true">💷</span>
+            Money
+          </button>
+        </Link>
+        <Link href="/jobs">
+          <button type="button" className="btn-indigo">
+            <span className="tile-icon" aria-hidden="true">📋</span>
+            All jobs
+          </button>
+        </Link>
+        <Link href="/calendar">
+          <button type="button" className="btn-teal">
+            <span className="tile-icon" aria-hidden="true">📅</span>
+            Calendar
+          </button>
+        </Link>
+        <Link href="/rounds">
+          <button type="button" className="btn-green">
+            <span className="tile-icon" aria-hidden="true">🗺️</span>
+            Fill my round
+          </button>
+        </Link>
+        <Link href="/customers">
+          <button type="button" className="btn-amber">
+            <span className="tile-icon" aria-hidden="true">👥</span>
+            Customers
+          </button>
+        </Link>
+        <Link href="/settings">
+          <button type="button" className="btn-grey">
+            <span className="tile-icon" aria-hidden="true">⚙️</span>
+            Settings
+          </button>
+        </Link>
+      </div>
 
       <SignOutButton />
     </div>
