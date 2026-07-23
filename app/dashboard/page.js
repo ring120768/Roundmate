@@ -126,6 +126,11 @@ export default async function DashboardPage() {
           Customers
         </button>
       </Link>
+      <Link href="/settings">
+        <button type="button" className="secondary">
+          Settings
+        </button>
+      </Link>
 
       <SignOutButton />
     </div>
