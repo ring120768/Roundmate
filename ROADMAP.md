@@ -618,6 +618,16 @@ The core loop (customer → job → complete → invoice → payment → next vi
 
 **Rule:** don't broaden until window cleaners are using it daily and paying. One niche first.
 
+## Feature Additions (Ringo, 2026-07-23)
+
+**Job photos (next up after payment reminders — high value, low complexity):** camera capture on the Complete flow (phone file input with capture), stored in the existing private `photos` Storage bucket under the business_id path, linked to the job. Before/after proof of work attached to invoice/receipt emails (signed URL or Resend attachment). Reduces "you never did it" disputes — a genuine daily-life feature for every trade, and pest control/locksmith work practically requires it.
+
+**Route optimisation (Smart Rounds phase 2, premium candidate):** Google Maps Routes API waypoint optimisation (up to ~25 stops/request) to order a day's jobs into an efficient route with one tap, from the existing postcode grouping. Needs a Google Cloud billing account + API key; per-request pricing — verify current Google Maps pricing/credits before building and cap usage. Design: optimise the day the tradesman already planned, never reorder without asking.
+
+**Promotional offers (fold into the Seasonal Campaigns engine, Phase 9):** same mechanic as Christmas lights reminders — segment customers (by service history, area, or all), send a templated offer email ("10% off gutter clears in March"), track uptake. Not a separate feature; one more campaign type in the generic engine.
+
+**Trades added 2026-07-23: Pest control** (round-friendly — contract visits are its bread and butter) **and Locksmith** (weaker round fit, strong landlord/agent channel — see work-provider pattern in RESEARCH-cross-pollination.md). Pug images pending: `trade-pest-control.jpg` and `trade-locksmith.jpg` are logo placeholders until Ringo generates the pest-control and locksmith pugs.
+
 ## Commercial Launch Plan (added 2026-07-21)
 
 **Sequencing rule: finish the money loop first** (domain live → test invoice → payment reminders → Stripe payment links). The app must collect money for tradesmen before it asks tradesmen for money.
