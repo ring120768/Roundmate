@@ -105,37 +105,43 @@ export default async function DashboardPage() {
       <div className="tile-grid">
         <Link href="/money">
           <button type="button" className="btn-coral">
-            <span className="tile-icon" aria-hidden="true">💷</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon-money.png" alt="" className="tile-img" aria-hidden="true" />
             Money
           </button>
         </Link>
         <Link href="/jobs">
           <button type="button" className="btn-indigo">
-            <span className="tile-icon" aria-hidden="true">📋</span>
-            All jobs
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon-jobs.png" alt="" className="tile-img" aria-hidden="true" />
+            My Jobs
           </button>
         </Link>
         <Link href="/calendar">
           <button type="button" className="btn-teal">
-            <span className="tile-icon" aria-hidden="true">📅</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon-calendar.png" alt="" className="tile-img" aria-hidden="true" />
             Calendar
           </button>
         </Link>
         <Link href="/rounds">
           <button type="button" className="btn-green">
-            <span className="tile-icon" aria-hidden="true">🗺️</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon-round.png" alt="" className="tile-img" aria-hidden="true" />
             Fill my round
           </button>
         </Link>
         <Link href="/customers">
           <button type="button" className="btn-amber">
-            <span className="tile-icon" aria-hidden="true">👥</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon-customers.png" alt="" className="tile-img" aria-hidden="true" />
             Customers
           </button>
         </Link>
         <Link href="/settings">
           <button type="button" className="btn-grey">
-            <span className="tile-icon" aria-hidden="true">⚙️</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/icon-settings.png" alt="" className="tile-img" aria-hidden="true" />
             Settings
           </button>
         </Link>
