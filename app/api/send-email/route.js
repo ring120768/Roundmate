@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { stripeRequest } from "@/lib/stripe";
 
 // Sends an invoice or receipt email to a job's customer via Resend.
 // The RESEND_API_KEY is a server-side secret (set in Vercel env vars), never
@@ -37,7 +38,7 @@ export async function POST(request) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, service_type, price, appointment_date, start_time, photo_paths, customers(id, first_name, last_name, email), businesses(name)"
+      "id, service_type, price, appointment_date, start_time, photo_paths, payment_link_id, payment_link_url, customers(id, first_name, last_name, email), businesses(name, stripe_account_id)"
     )
     .eq("id", jobId)
     .single();
@@ -87,6 +88,49 @@ export async function POST(request) {
     }
   }
 
+  // For invoices: a card payment link on the tradesman's own Stripe account
+  // (created once per job, reused on re-sends; best effort — the invoice
+  // still goes without it).
+  let payLinkUrl = job.payment_link_url || null;
+  if (
+    type === "invoice" &&
+    !payLinkUrl &&
+    job.businesses?.stripe_account_id &&
+    job.price != null &&
+    Number(job.price) > 0
+  ) {
+    try {
+      const acct = job.businesses.stripe_account_id;
+      const priceObj = await stripeRequest(
+        "/prices",
+        {
+          currency: "gbp",
+          unit_amount: Math.round(Number(job.price) * 100),
+          product_data: { name: `${service}${dateLabel ? ` — ${dateLabel}` : ""}` },
+        },
+        { stripeAccount: acct }
+      );
+      const link = await stripeRequest(
+        "/payment_links",
+        { line_items: [{ price: priceObj.id, quantity: 1 }] },
+        { stripeAccount: acct }
+      );
+      payLinkUrl = link.url;
+      await supabase
+        .from("jobs")
+        .update({ payment_link_id: link.id, payment_link_url: link.url })
+        .eq("id", job.id);
+    } catch {
+      /* no pay button this time */
+    }
+  }
+  const payButtonHtml = payLinkUrl
+    ? `<p style="margin:20px 0;">
+         <a href="${payLinkUrl}" style="display:inline-block;background:#2563eb;color:#ffffff;padding:14px 28px;border-radius:10px;text-decoration:none;font-weight:bold;font-size:16px;">Pay now by card</a>
+       </p>
+       <p style="font-size:13px;color:#6b7280;margin-top:0;">Apple Pay, Google Pay or any card — takes seconds.</p>`
+    : "";
+
   const wrap = (inner) =>
     `<div style="font-family:Arial,Helvetica,sans-serif;color:#111827;max-width:480px;margin:0 auto;">
       <h2 style="color:#185fa5;margin:0 0 16px;">${businessName}</h2>
@@ -101,7 +145,8 @@ export async function POST(request) {
       `<p>Hi ${firstName},</p>
        <p>Here's your invoice for <strong>${service}</strong> on ${dateLabel}.</p>
        <p style="font-size:26px;font-weight:bold;margin:18px 0;">${amount}</p>
-       <p>Please settle up at your convenience — just reply to this email if you have any questions.</p>
+       ${payButtonHtml}
+       <p>${payLinkUrl ? "Or settle up however suits" : "Please settle up at your convenience"} — just reply to this email if you have any questions.</p>
        ${photosHtml}`
     );
   } else if (type === "receipt") {

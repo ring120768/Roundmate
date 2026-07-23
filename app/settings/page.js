@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import Brand from "@/components/Brand";
 import SettingsForm from "@/components/SettingsForm";
+import StripeConnect from "@/components/StripeConnect";
 import { tradeLabel, tradeImage } from "@/lib/trades";
 
 export default async function SettingsPage() {
@@ -26,6 +27,9 @@ export default async function SettingsPage() {
       <p className="muted">Your business details.</p>
       <div className="spacer" />
       <SettingsForm business={profile.businesses} userId={user.id} />
+
+      <div className="spacer" />
+      <StripeConnect />
 
       <div className="spacer" />
       <Link href="/trade">
