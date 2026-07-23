@@ -23,16 +23,10 @@ export async function GET() {
 
   try {
     const eps = await stripeRequest("/webhook_endpoints?limit=10");
-    out.platformWebhookEndpoints = eps.data.map((e) => ({
-      id: e.id,
-      url: e.url,
-      status: e.status,
-      listensToConnectedAccounts: e.connect ?? false,
-      events: e.enabled_events,
-      api_version: e.api_version,
-    }));
+    // Raw objects — no field mapping, so we can see Stripe's actual shape.
+    out.platformWebhookEndpointsRaw = eps.data;
   } catch (e) {
-    out.platformWebhookEndpoints = `error: ${e.message}`;
+    out.platformWebhookEndpointsRaw = `error: ${e.message}`;
   }
 
   try {

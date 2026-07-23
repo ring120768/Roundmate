@@ -15,6 +15,23 @@ export async function GET() {
   if (!user) return NextResponse.json({ error: "Not signed in" }, { status: 401 });
 
   try {
+    // Idempotent this time: remove any endpoints we previously created for
+    // our URL, then create one fresh connect-scoped endpoint.
+    const existing = await stripeRequest("/webhook_endpoints?limit=20");
+    const removed = [];
+    for (const e of existing.data || []) {
+      if (e.url === "https://www.roundmate.co.uk/api/stripe/webhook") {
+        try {
+          await stripeRequest(`/webhook_endpoints/${e.id}`, null, {
+            method: "DELETE",
+          });
+          removed.push(e.id);
+        } catch {
+          /* keep going */
+        }
+      }
+    }
+
     const endpoint = await stripeRequest("/webhook_endpoints", {
       url: "https://www.roundmate.co.uk/api/stripe/webhook",
       enabled_events: ["checkout.session.completed"],
@@ -25,11 +42,11 @@ export async function GET() {
 
     return NextResponse.json({
       done: true,
-      endpointId: endpoint.id,
-      listensToConnectedAccounts: endpoint.connect ?? true,
+      removedOldEndpoints: removed,
+      rawEndpointResponse: endpoint,
       SIGNING_SECRET_put_this_in_Vercel_as_STRIPE_WEBHOOK_SECRET:
         endpoint.secret,
-      then: "Update the env var, redeploy, delete the old dashboard destinations, and delete this route.",
+      then: "Update the env var, redeploy, then visit /api/stripe/debug and send Claude the output.",
     });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 502 });
