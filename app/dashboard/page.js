@@ -114,7 +114,7 @@ export default async function DashboardPage() {
           <button type="button" className="btn-indigo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/icon-jobs.png" alt="" className="tile-img" aria-hidden="true" />
-            My Jobs
+            My Booked Jobs
           </button>
         </Link>
         <Link href="/calendar">
