@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import Brand from "@/components/Brand";
 import SettingsForm from "@/components/SettingsForm";
+import { tradeLabel } from "@/lib/trades";
 
 export default async function SettingsPage() {
   const supabase = createClient();
@@ -21,9 +23,16 @@ export default async function SettingsPage() {
     <div className="container">
       <Brand variant="bar" />
       <h1>Settings</h1>
-      <p className="muted">Your business details and trade.</p>
+      <p className="muted">Your business details.</p>
       <div className="spacer" />
       <SettingsForm business={profile.businesses} userId={user.id} />
+
+      <div className="spacer" />
+      <Link href="/trade">
+        <button type="button" className="secondary">
+          Change trade — currently {tradeLabel(profile.businesses?.trade) || "not set"}
+        </button>
+      </Link>
     </div>
   );
 }

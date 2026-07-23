@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import TradeGrid from "@/components/TradeGrid";
 
 export default function SettingsForm({ business, userId }) {
   const router = useRouter();
@@ -14,7 +13,6 @@ export default function SettingsForm({ business, userId }) {
     name: business?.name ?? "",
     owner_name: business?.owner_name ?? "",
     phone: business?.phone ?? "",
-    trade: business?.trade ?? "window_cleaning",
   });
   const [error, setError] = useState("");
   const [status, setStatus] = useState("");
@@ -37,7 +35,6 @@ export default function SettingsForm({ business, userId }) {
         name: form.name,
         owner_name: form.owner_name,
         phone: form.phone || null,
-        trade: form.trade,
       })
       .eq("id", business.id);
 
@@ -74,19 +71,6 @@ export default function SettingsForm({ business, userId }) {
 
         <label htmlFor="s_phone">Phone</label>
         <input id="s_phone" type="tel" value={form.phone} onChange={set("phone")} />
-
-        <label>Trade</label>
-        <TradeGrid
-          value={form.trade}
-          onChange={(key) => {
-            setStatus("");
-            setForm((f) => ({ ...f, trade: key }));
-          }}
-        />
-        <p className="muted" style={{ fontSize: 13 }}>
-          Changing trade changes the service list on new jobs. Existing jobs
-          and customers are untouched.
-        </p>
 
         <button type="submit" disabled={loading}>
           {loading ? "Saving…" : "Save settings"}
