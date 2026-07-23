@@ -6,7 +6,7 @@ import Link from "next/link";
 // Shows the RoundMate logo + name. The logo image lives at /logo.png
 // (put your file in the project's `public` folder). If it's missing, we just
 // show the wordmark — no broken image.
-export default function Brand({ variant = "bar" }) {
+export default function Brand({ variant = "bar", image = "/logo.png" }) {
   const [imgOk, setImgOk] = useState(true);
 
   if (variant === "hero" || variant === "landing") {
@@ -35,7 +35,7 @@ export default function Brand({ variant = "bar" }) {
       {imgOk && (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
-          src="/logo.png"
+          src={image}
           alt=""
           className="brand-bar-img"
           onError={() => setImgOk(false)}

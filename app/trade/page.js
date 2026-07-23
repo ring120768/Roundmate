@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Brand from "@/components/Brand";
 import ChangeTradeForm from "@/components/ChangeTradeForm";
+import { tradeImage } from "@/lib/trades";
 
 export default async function ChangeTradePage({ searchParams }) {
   const supabase = createClient();
@@ -19,7 +20,7 @@ export default async function ChangeTradePage({ searchParams }) {
 
   return (
     <div className="container">
-      <Brand variant="bar" />
+      <Brand variant="bar" image={tradeImage(profile.businesses?.trade)} />
       <h1>Change trade</h1>
       <p className="muted">Pick the trade your business works in.</p>
       <div className="spacer" />

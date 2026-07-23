@@ -5,6 +5,7 @@ import SignOutButton from "@/components/SignOutButton";
 import Brand from "@/components/Brand";
 import TradeQuickSwitch from "@/components/TradeQuickSwitch";
 import { statusLabel } from "@/lib/jobOptions";
+import { tradeImage } from "@/lib/trades";
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -40,7 +41,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="container">
-      <Brand variant="bar" />
+      <Brand variant="bar" image={tradeImage(profile.businesses?.trade)} />
       <div style={{ marginBottom: 16 }}>
         <h1>Today</h1>
         <p className="muted">

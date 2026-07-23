@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import Brand from "@/components/Brand";
 import SettingsForm from "@/components/SettingsForm";
-import { tradeLabel } from "@/lib/trades";
+import { tradeLabel, tradeImage } from "@/lib/trades";
 
 export default async function SettingsPage() {
   const supabase = createClient();
@@ -21,7 +21,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="container">
-      <Brand variant="bar" />
+      <Brand variant="bar" image={tradeImage(profile.businesses?.trade)} />
       <h1>Settings</h1>
       <p className="muted">Your business details.</p>
       <div className="spacer" />
