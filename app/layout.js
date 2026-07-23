@@ -2,7 +2,7 @@ import "./globals.css";
 
 export const metadata = {
   title: "RoundMate",
-  description: "Your admin assistant for jobs, invoices and payments.",
+  description: "Your admin assistant for bookings, jobs, invoices and payments.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,

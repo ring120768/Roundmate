@@ -1,7 +1,7 @@
 {
   "name": "RoundMate",
   "short_name": "RoundMate",
-  "description": "Jobs, invoices and payments — sorted.",
+  "description": "Bookings, jobs, invoices and payments — sorted.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

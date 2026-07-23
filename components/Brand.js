@@ -25,7 +25,7 @@ export default function Brand({ variant = "bar" }) {
           />
         )}
         <h1 className="brand-name">RoundMate</h1>
-        <p className="muted">Jobs, invoices and payments — sorted.</p>
+        <p className="muted">Bookings, jobs, invoices and payments — sorted.</p>
       </div>
     );
   }

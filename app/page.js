@@ -20,8 +20,8 @@ export default function LandingPage() {
     >
       <Brand variant="landing" />
       <p className="muted" style={{ marginTop: -6, marginBottom: 18 }}>
-        For every trade that comes back — rounds, jobs, invoices and payments,
-        sorted.
+        For every trade that comes back — bookings, rounds, jobs, invoices and
+        payments, sorted.
       </p>
       <TradePicker />
       <div className="spacer" />
