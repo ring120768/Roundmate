@@ -37,7 +37,7 @@ export async function POST(request) {
   const { data: job } = await supabase
     .from("jobs")
     .select(
-      "id, service_type, price, appointment_date, start_time, customers(id, first_name, last_name, email), businesses(name)"
+      "id, service_type, price, appointment_date, start_time, photo_paths, customers(id, first_name, last_name, email), businesses(name)"
     )
     .eq("id", jobId)
     .single();
@@ -66,6 +66,27 @@ export async function POST(request) {
       })
     : "";
 
+  // Photos of the work, embedded via 30-day signed links (private bucket).
+  let photosHtml = "";
+  if ((type === "invoice" || type === "receipt") && job.photo_paths?.length) {
+    const { data: signed } = await supabase.storage
+      .from("photos")
+      .createSignedUrls(job.photo_paths, 60 * 60 * 24 * 30);
+    const urls = (signed || [])
+      .filter((s) => s.signedUrl)
+      .map((s) => s.signedUrl);
+    if (urls.length) {
+      photosHtml =
+        `<p style="margin-top:20px;"><strong>Photos of the work:</strong></p>` +
+        urls
+          .map(
+            (u) =>
+              `<img src="${u}" alt="Photo of the work" style="max-width:100%;border-radius:8px;margin:6px 0;" />`
+          )
+          .join("");
+    }
+  }
+
   const wrap = (inner) =>
     `<div style="font-family:Arial,Helvetica,sans-serif;color:#111827;max-width:480px;margin:0 auto;">
       <h2 style="color:#185fa5;margin:0 0 16px;">${businessName}</h2>
@@ -80,14 +101,16 @@ export async function POST(request) {
       `<p>Hi ${firstName},</p>
        <p>Here's your invoice for <strong>${service}</strong> on ${dateLabel}.</p>
        <p style="font-size:26px;font-weight:bold;margin:18px 0;">${amount}</p>
-       <p>Please settle up at your convenience — just reply to this email if you have any questions.</p>`
+       <p>Please settle up at your convenience — just reply to this email if you have any questions.</p>
+       ${photosHtml}`
     );
   } else if (type === "receipt") {
     subject = `Payment received — thank you`;
     html = wrap(
       `<p>Hi ${firstName},</p>
        <p>Thank you — we've received your payment of <strong>${amount}</strong> for ${service} on ${dateLabel}.</p>
-       <p>Much appreciated. See you next time.</p>`
+       <p>Much appreciated. See you next time.</p>
+       ${photosHtml}`
     );
   } else {
     // confirmation of the next visit

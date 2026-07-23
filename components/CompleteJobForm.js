@@ -18,8 +18,31 @@ export default function CompleteJobForm({ job }) {
   const [bookNext, setBookNext] = useState(Boolean(suggested));
   const [nextDate, setNextDate] = useState(suggested || "");
   const [note, setNote] = useState("");
+  const [photos, setPhotos] = useState([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Shrink a photo before upload — van 4G doesn't want 8MB originals, and
+  // neither does the customer's inbox.
+  async function downscale(file, max = 1600, quality = 0.8) {
+    const bitmap = await createImageBitmap(file);
+    const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+    const w = Math.round(bitmap.width * scale);
+    const h = Math.round(bitmap.height * scale);
+    const canvas = document.createElement("canvas");
+    canvas.width = w;
+    canvas.height = h;
+    canvas.getContext("2d").drawImage(bitmap, 0, 0, w, h);
+    return new Promise((resolve) =>
+      canvas.toBlob(resolve, "image/jpeg", quality)
+    );
+  }
+
+  function onPhotosChosen(e) {
+    const files = Array.from(e.target.files || []);
+    if (files.length) setPhotos((p) => [...p, ...files]);
+    e.target.value = ""; // allow picking the same file again
+  }
 
   // Best-effort email send — completion still succeeds even if an email fails.
   async function fireEmail(jobId, type) {
@@ -41,12 +64,33 @@ export default function CompleteJobForm({ job }) {
 
     const priceVal = price === "" ? null : Number(price);
 
+    // Upload photos first (best effort — a failed photo never blocks
+    // completing the job).
+    const photoPaths = [];
+    for (const file of photos) {
+      try {
+        const blob = (await downscale(file).catch(() => null)) || file;
+        const path = `${job.business_id}/jobs/${job.id}/${Date.now()}-${Math.random()
+          .toString(36)
+          .slice(2, 8)}.jpg`;
+        const { error: upErr } = await supabase.storage
+          .from("photos")
+          .upload(path, blob, { contentType: "image/jpeg" });
+        if (!upErr) photoPaths.push(path);
+      } catch {
+        /* skip this photo */
+      }
+    }
+
     const updates = {
       status: "completed",
       completed_at: new Date().toISOString(),
       payment_status: outcome,
       price: priceVal,
     };
+    if (photoPaths.length) {
+      updates.photo_paths = [...(job.photo_paths || []), ...photoPaths];
+    }
     if (note.trim()) {
       updates.notes = job.notes ? `${job.notes}\n${note.trim()}` : note.trim();
     }
@@ -146,6 +190,48 @@ export default function CompleteJobForm({ job }) {
             style={{ marginTop: 10 }}
           />
         )}
+
+        <label htmlFor="photos" style={{ marginTop: 22 }}>
+          Photos of the work (optional)
+        </label>
+        <input
+          id="photos"
+          type="file"
+          accept="image/*"
+          capture="environment"
+          multiple
+          onChange={onPhotosChosen}
+        />
+        {photos.length > 0 && (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+            {photos.map((f, i) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={i}
+                src={URL.createObjectURL(f)}
+                alt={`photo ${i + 1}`}
+                style={{
+                  width: 64,
+                  height: 64,
+                  objectFit: "cover",
+                  borderRadius: 8,
+                  border: "1px solid rgba(0,0,0,0.1)",
+                }}
+              />
+            ))}
+            <button
+              type="button"
+              className="secondary"
+              style={{ width: "auto", padding: "6px 10px", fontSize: 13 }}
+              onClick={() => setPhotos([])}
+            >
+              Clear
+            </button>
+          </div>
+        )}
+        <p className="muted" style={{ fontSize: 13 }}>
+          Sent with the invoice or receipt as proof of the work.
+        </p>
 
         <label htmlFor="note">Note (optional)</label>
         <textarea

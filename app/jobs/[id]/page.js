@@ -30,6 +30,15 @@ export default async function JobDetailPage({ params }) {
     .single();
   if (!job) notFound();
 
+  // Signed URLs for any job photos (private bucket, 1-hour links for viewing).
+  let photoUrls = [];
+  if (job.photo_paths?.length) {
+    const { data: signed } = await supabase.storage
+      .from("photos")
+      .createSignedUrls(job.photo_paths, 3600);
+    photoUrls = (signed || []).filter((s) => s.signedUrl).map((s) => s.signedUrl);
+  }
+
   const cust = job.customers;
   const dateLabel = job.appointment_date
     ? new Date(job.appointment_date + "T00:00:00").toLocaleDateString("en-GB", {
@@ -67,6 +76,32 @@ export default async function JobDetailPage({ params }) {
           />
         )}
         <Field label="Notes" value={job.notes} />
+
+        {photoUrls.length > 0 && (
+          <div style={{ marginBottom: 6 }}>
+            <div className="muted" style={{ fontSize: 13, marginBottom: 6 }}>
+              Photos
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {photoUrls.map((url, i) => (
+                <a key={i} href={url} target="_blank" rel="noreferrer">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={url}
+                    alt={`Job photo ${i + 1}`}
+                    style={{
+                      width: 96,
+                      height: 96,
+                      objectFit: "cover",
+                      borderRadius: 10,
+                      border: "1px solid rgba(0,0,0,0.1)",
+                    }}
+                  />
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {job.status !== "completed" && (
