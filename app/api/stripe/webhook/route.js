@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient as createSupabaseAdmin } from "@supabase/supabase-js";
 import crypto from "crypto";
+import { sendJobEmail } from "@/lib/jobEmails";
 
 // Stripe calls this when a customer pays a payment link on a connected
 // account (Connect webhook, event: checkout.session.completed). No user is
@@ -127,6 +128,14 @@ export async function POST(request) {
           }
         } catch {
           /* best effort */
+        }
+
+        // The branded thank-you: receipt (with any job photos) from the
+        // tradesman's name, sent the moment the card payment lands.
+        try {
+          await sendJobEmail(admin, job.id, "receipt");
+        } catch {
+          /* best effort — payment is already recorded */
         }
       }
     }
