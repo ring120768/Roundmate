@@ -26,6 +26,14 @@ Distribution is where this wins accounts: the link goes in his **Google Business
 
 Security: the public request page needs no login and no token — it's lead capture (rate-limited, honeypot field, notification email). Tokenized magic links come later for *existing-customer* one-tap actions (confirm visit, pay): 128-bit random tokens, hashed in the DB, scoped to one customer + one action, and always landing on a page with a button rather than mutating on the link click itself (email scanners pre-fetch links — a GET must never confirm anything).
 
+### Positioning + parameters (agreed 2026-07-24)
+
+The headline edge, in Ringo's framing: **"we know geography, Calendly doesn't."** A tradesman's diary is a map with days attached, not a calendar of slots — so the confirm screen suggests dates from days he's already in that postcode district (Smart Rounds data), and a naive slot-picker can never torpedo a route day.
+
+**Instant-confirm (later phase):** the tradesman can set parameters — postcode districts, days, services — and any request that fits inside them is auto-accepted and booked, firing the normal confirmation email. Uber-style immediacy, tradesman-defined boundaries. Off by default.
+
+**Marketplace — someday, not now (agreed 2026-07-24):** a full two-sided marketplace (customer posts job, nearby tradesmen compete) is parked. It needs demand liquidity we don't have and flips us onto the customer's side against our own users. But if RoundMate wins as SaaS, the supply side comes free — "overflow jobs from the RoundMate network" becomes possible later from strength. The directory (below) is the staged version of this bet.
+
 ### Build phases
 
 Phase A (the core, ~3–4 sessions): `booking_requests` table + business handle column; public request page (one new public route with its own minimal RLS-safe insert path); dashboard badge + request list; confirm flow (creates customer + job, sends confirmation); decline flow. Phase B (~1–2 sessions): QR code generator on the settings page; email-footer link; Google Business Profile setup guide. Phase C (later): tokenized one-tap links for existing customers (request-again, confirm-visit), which also power the agent/work-provider channel from the research doc.
@@ -55,6 +63,18 @@ When a job completes → push the invoice; when it's marked paid → push the pa
 **Skip Sage** (5-minute tokens, rotating refresh, ID-resolution ceremony, weakest sole-trader overlap).
 
 ---
+
+## Feature 3 — Consumer directory app (integration brief accepted 2026-07-24)
+
+Ringo's brief (RoundMate_Integration_Brief.md): a **separate consumer-facing app** (own repo/deploy/domain) sharing the existing Supabase project. A directory of ~11,500 scraped UK home-service businesses (London + Essex/Surrey, our nine trades) doubles as consumer inventory AND the tradesperson acquisition list. The loop: homeowner books on the consumer app → the job needs managing → the tradesperson onboards to RoundMate.
+
+**Integration surface (additive only, nothing existing refactored):** new tables `directory_listings` (public READ only, `claimed_by` → businesses.id nullable) and `reviews` (service-role insert only, booking-gated); touchpoint 1 = booking handoff (consumer app writes a lead, RoundMate surfaces it), touchpoint 2 = "This is my business" claim (one update, can land later).
+
+**Accepted amendments to the brief:**
+- **Leads and booking requests are the same thing.** Use ONE `booking_requests` table with a `source` column ('page' | 'directory'), not a parallel leads path — the premium booking-page feature (Feature 1) and directory handoff then share the dashboard badge, confirm flow, and emails for free. Build Feature 1 Phase A first; the directory plugs into it.
+- **No anon writes, ever.** The consumer app inserts leads via its own server route using the service role (rate-limited, honeypot) — the anon key must never gain insert on any shared table.
+- **Compliance before launch:** the scraped list is largely sole traders, who count as individuals under UK GDPR/PECR — so (a) publishing their details needs a legitimate-interest assessment + easy takedown/claim path, (b) the planned cold-email campaign to listed trades is NOT covered by the B2B exemption for sole traders — needs care (post, phone, or opt-in routes are safer), (c) reviews on unclaimed businesses = defamation/complaints surface; keep reviews booking-gated and launch them late.
+- Shared-DB blast radius is acceptable given public read is confined to `directory_listings` — revisit if the consumer app ever needs more.
 
 ## How this fits the existing roadmap
 
