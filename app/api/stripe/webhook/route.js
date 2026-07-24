@@ -91,7 +91,11 @@ export async function POST(request) {
       if (job) {
         await admin
           .from("jobs")
-          .update({ payment_status: "paid" })
+          .update({
+            payment_status: "paid",
+            paid_at: new Date().toISOString(),
+            paid_method: "card",
+          })
           .eq("id", job.id);
 
         await admin.from("messages").insert({

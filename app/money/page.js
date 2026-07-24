@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PAID_STATUSES } from "@/lib/jobOptions";
 import UnpaidList from "@/components/UnpaidList";
+import AccountsExport from "@/components/AccountsExport";
 
 export default async function MoneyPage() {
   const supabase = createClient();
@@ -69,6 +70,10 @@ export default async function MoneyPage() {
       <div className="spacer" />
       <h2>Unpaid</h2>
       <UnpaidList jobs={unpaid ?? []} />
+
+      <div className="spacer" />
+      <h2>Accounts</h2>
+      <AccountsExport />
 
       <Link href="/dashboard" className="linklike">
         ← Back to dashboard

@@ -88,6 +88,11 @@ export default function CompleteJobForm({ job }) {
       payment_status: outcome,
       price: priceVal,
     };
+    // Paid on the spot — record when and how, for the accounts export.
+    if (outcome === "cash" || outcome === "bank") {
+      updates.paid_at = new Date().toISOString();
+      updates.paid_method = outcome;
+    }
     if (photoPaths.length) {
       updates.photo_paths = [...(job.photo_paths || []), ...photoPaths];
     }

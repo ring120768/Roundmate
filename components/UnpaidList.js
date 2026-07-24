@@ -14,7 +14,12 @@ export default function UnpaidList({ jobs }) {
     setBusyId(id);
     const { error } = await supabase
       .from("jobs")
-      .update({ payment_status: "paid" })
+      .update({
+        payment_status: "paid",
+        paid_at: new Date().toISOString(),
+        // Marked paid after the fact — nearly always a bank transfer landing.
+        paid_method: "bank",
+      })
       .eq("id", id);
 
     // Send the thank-you receipt too (best effort — marking paid succeeds

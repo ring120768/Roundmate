@@ -1,0 +1,152 @@
+<mxfile host="app.diagrams.net" modified="2026-07-24T09:00:00.000Z" agent="RoundMate" version="24.0.0">
+  <diagram id="rm-arch" name="RoundMate architecture">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ===== Title ===== -->
+        <mxCell id="title" value="RoundMate — current architecture (July 2026)" style="text;html=1;fontSize=24;fontStyle=1;fontColor=#185fa5;align=left;" vertex="1" parent="1">
+          <mxGeometry x="40" y="20" width="700" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Tradesman ===== -->
+        <mxCell id="tradesman" value="&lt;b&gt;Tradesman&#39;s phone&lt;/b&gt;&lt;br&gt;PWA (add to home screen)&lt;br&gt;&lt;br&gt;Dashboard · Jobs · Rounds&lt;br&gt;Calendar · Money · Customers&lt;br&gt;Complete job + photos&lt;br&gt;Change Trade" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d6f6e9;strokeColor=#0e9f6e;fontSize=13;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="120" width="220" height="180" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Customer ===== -->
+        <mxCell id="customer" value="&lt;b&gt;Customer&lt;/b&gt;&lt;br&gt;No app, no account —&lt;br&gt;just their email inbox&lt;br&gt;&lt;br&gt;Invoice / receipt / visit&lt;br&gt;confirmation emails&lt;br&gt;One tap: &lt;b&gt;Pay now by card&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fbe5da;strokeColor=#e0674a;fontSize=13;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="40" y="620" width="220" height="170" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Vercel container ===== -->
+        <mxCell id="vercel" value="Vercel — roundmate.co.uk (Next.js 14, App Router)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fafbfd;strokeColor=#4c6ef5;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=8;dashed=0;" vertex="1" parent="1">
+          <mxGeometry x="360" y="100" width="560" height="480" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pages" value="&lt;b&gt;App pages&lt;/b&gt;&lt;br&gt;/ landing + trade picker&lt;br&gt;/dashboard · /jobs · /rounds&lt;br&gt;/calendar · /money · /customers&lt;br&gt;/trade · /settings&lt;br&gt;&lt;br&gt;lib/trades.js drives all 9 trades" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#4c6ef5;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="vercel">
+          <mxGeometry x="20" y="40" width="250" height="150" as="geometry" />
+        </mxCell>
+
+        <mxCell id="apiSend" value="&lt;b&gt;/api/send-email&lt;/b&gt;&lt;br&gt;auth&#39;d wrapper → lib/jobEmails.js&lt;br&gt;invoice · receipt · confirmation" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f7ce;strokeColor=#b7a900;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="vercel">
+          <mxGeometry x="290" y="40" width="250" height="70" as="geometry" />
+        </mxCell>
+
+        <mxCell id="apiWebhook" value="&lt;b&gt;/api/stripe/webhook&lt;/b&gt;&lt;br&gt;verifies per-business secret,&lt;br&gt;marks job paid, kills pay link,&lt;br&gt;sends branded receipt" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f7ce;strokeColor=#b7a900;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="vercel">
+          <mxGeometry x="290" y="120" width="250" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="apiConnect" value="&lt;b&gt;/api/stripe/connect&lt;/b&gt;&lt;br&gt;creates connected account +&lt;br&gt;its webhook endpoint, returns&lt;br&gt;Stripe onboarding link" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f7ce;strokeColor=#b7a900;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="vercel">
+          <mxGeometry x="290" y="220" width="250" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="apiRoute" value="&lt;b&gt;/api/optimize-route&lt;/b&gt;&lt;br&gt;Google Routes (live traffic)&lt;br&gt;or NN + 2-opt fallback" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f9f7ce;strokeColor=#b7a900;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="vercel">
+          <mxGeometry x="290" y="320" width="250" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="libs" value="&lt;b&gt;Shared libs&lt;/b&gt;&lt;br&gt;jobEmails.js — builds + sends all job emails (photos, pay link)&lt;br&gt;stripe.js — REST client&lt;br&gt;geocode.js — postcodes.io" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ebebeb;strokeColor=#6b7280;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="vercel">
+          <mxGeometry x="20" y="210" width="250" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="cron" value="&lt;b&gt;Next up:&lt;/b&gt; Vercel Cron&lt;br&gt;payment reminders (day 3/7/14)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#6b7280;dashed=1;fontSize=12;verticalAlign=top;spacingTop=6;fontColor=#6b7280;" vertex="1" parent="vercel">
+          <mxGeometry x="20" y="340" width="250" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="deploy" value="Auto-deploys from GitHub ring120768/Roundmate (main)" style="text;html=1;fontSize=11;fontColor=#6b7280;align=left;" vertex="1" parent="vercel">
+          <mxGeometry x="20" y="440" width="400" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Supabase container ===== -->
+        <mxCell id="supabase" value="Supabase (eu-west-1) — single source of truth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fbead0;strokeColor=#d97706;fontSize=14;fontStyle=1;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="100" width="520" height="380" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sbAuth" value="&lt;b&gt;Auth&lt;/b&gt;&lt;br&gt;email + password,&lt;br&gt;confirmation on" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d97706;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="supabase">
+          <mxGeometry x="20" y="40" width="150" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sbDb" value="&lt;b&gt;Postgres + RLS&lt;/b&gt;&lt;br&gt;businesses (trade, stripe ids)&lt;br&gt;profiles · customers (lat/lng)&lt;br&gt;jobs (status, payment, photos,&lt;br&gt;pay-link id) · messages log&lt;br&gt;&lt;br&gt;RLS: every row scoped to&lt;br&gt;the owner&#39;s business_id" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d97706;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="supabase">
+          <mxGeometry x="190" y="40" width="220" height="160" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sbStorage" value="&lt;b&gt;Storage (private)&lt;/b&gt;&lt;br&gt;photos bucket — job photos,&lt;br&gt;30-day signed URLs in emails" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#d97706;fontSize=12;verticalAlign=top;spacingTop=6;" vertex="1" parent="supabase">
+          <mxGeometry x="20" y="140" width="150" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="sbNote" value="App talks to Supabase two ways:&lt;br&gt;• signed-in user → anon key + RLS&lt;br&gt;• Stripe webhook → service-role key (no user present)" style="text;html=1;fontSize=11;fontColor=#92400e;align=left;" vertex="1" parent="supabase">
+          <mxGeometry x="20" y="260" width="480" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Stripe ===== -->
+        <mxCell id="stripe" value="&lt;b&gt;Stripe Connect&lt;/b&gt;&lt;br&gt;Platform: Roundmate (live)&lt;br&gt;+ one &lt;b&gt;connected account per tradesman&lt;/b&gt;&lt;br&gt;(their money goes straight to them)&lt;br&gt;&lt;br&gt;Payment Links → Checkout&lt;br&gt;(Apple Pay / Google Pay / card)&lt;br&gt;Per-account webhook → RoundMate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e9d8fd;strokeColor=#7c3aed;fontSize=13;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="360" y="640" width="300" height="200" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Resend ===== -->
+        <mxCell id="resend" value="&lt;b&gt;Resend&lt;/b&gt;&lt;br&gt;sends as&lt;br&gt;&quot;Business Name&quot;&lt;br&gt;&amp;lt;hello@roundmate.co.uk&amp;gt;&lt;br&gt;reply-to: the tradesman" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dbeafe;strokeColor=#2563eb;fontSize=13;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="720" y="640" width="200" height="140" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Google / postcodes ===== -->
+        <mxCell id="google" value="&lt;b&gt;Google Routes API&lt;/b&gt;&lt;br&gt;optimal stop order,&lt;br&gt;live road data&lt;br&gt;(5,000 free/month)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="980" y="640" width="180" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="postcodes" value="&lt;b&gt;postcodes.io&lt;/b&gt;&lt;br&gt;free UK geocoding&lt;br&gt;on customer save/import" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dcfce7;strokeColor=#16a34a;fontSize=12;verticalAlign=top;spacingTop=8;" vertex="1" parent="1">
+          <mxGeometry x="1200" y="640" width="180" height="110" as="geometry" />
+        </mxCell>
+
+        <!-- ===== Edges ===== -->
+        <mxCell id="e1" value="HTTPS · roundmate.co.uk" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#0e9f6e;fontSize=11;fontColor=#0e9f6e;" edge="1" parent="1" source="tradesman" target="vercel">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e2" value="auth + data (anon key, RLS)" style="endArrow=classic;startArrow=classic;html=1;strokeColor=#d97706;fontSize=11;fontColor=#d97706;" edge="1" parent="1" source="vercel" target="supabase">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e3" value="send email" style="endArrow=classic;html=1;strokeColor=#2563eb;fontSize=11;fontColor=#2563eb;" edge="1" parent="1" source="apiSend" target="resend">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e4" value="invoice · receipt · confirmation" style="endArrow=classic;html=1;strokeColor=#2563eb;fontSize=11;fontColor=#2563eb;exitX=0;exitY=0.5;" edge="1" parent="1" source="resend" target="customer">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e5" value="taps Pay now → Checkout" style="endArrow=classic;html=1;strokeColor=#7c3aed;fontSize=11;fontColor=#7c3aed;" edge="1" parent="1" source="customer" target="stripe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e6" value="checkout.session.completed (signed webhook)" style="endArrow=classic;html=1;strokeColor=#7c3aed;fontSize=11;fontColor=#7c3aed;dashed=1;" edge="1" parent="1" source="stripe" target="apiWebhook">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e7" value="create pay link (on connected acct)" style="endArrow=classic;html=1;strokeColor=#7c3aed;fontSize=11;fontColor=#7c3aed;" edge="1" parent="1" source="libs" target="stripe">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e8" value="mark paid + log (service role)" style="endArrow=classic;html=1;strokeColor=#d97706;fontSize=11;fontColor=#d97706;dashed=1;exitX=1;exitY=0.5;" edge="1" parent="1" source="apiWebhook" target="sbDb">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e9" value="optimise stop order" style="endArrow=classic;html=1;strokeColor=#16a34a;fontSize=11;fontColor=#16a34a;" edge="1" parent="1" source="apiRoute" target="google">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e10" value="postcode → lat/lng" style="endArrow=classic;html=1;strokeColor=#16a34a;fontSize=11;fontColor=#16a34a;" edge="1" parent="1" source="libs" target="postcodes">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e11" value="payout → tradesman&#39;s bank" style="endArrow=classic;html=1;strokeColor=#7c3aed;fontSize=11;fontColor=#7c3aed;exitX=0.25;exitY=0;entryX=0.5;entryY=1;" edge="1" parent="1" source="stripe" target="tradesman">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="150" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
