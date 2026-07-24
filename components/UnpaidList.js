@@ -16,6 +16,21 @@ export default function UnpaidList({ jobs }) {
       .from("jobs")
       .update({ payment_status: "paid" })
       .eq("id", id);
+
+    // Send the thank-you receipt too (best effort — marking paid succeeds
+    // even if the customer has no email or the send fails).
+    if (!error) {
+      try {
+        await fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ jobId: id, type: "receipt" }),
+        });
+      } catch {
+        /* ignore */
+      }
+    }
+
     setBusyId(null);
     if (!error) router.refresh();
   }
