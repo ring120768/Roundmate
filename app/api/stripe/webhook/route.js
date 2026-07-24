@@ -34,9 +34,31 @@ function verifyStripeSignature(payload, sigHeader, secret) {
 }
 
 export async function POST(request) {
-  const secret = process.env.STRIPE_WEBHOOK_SECRET;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!secret || !serviceKey) {
+  if (!serviceKey) {
+    return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+  }
+
+  // Two kinds of endpoint hit this route:
+  // - per-connected-account endpoints (created by us) call with ?business=<id>
+  //   and are verified against that business's stored signing secret;
+  // - a legacy platform-level endpoint (if any) verifies against the env secret.
+  const businessId = new URL(request.url).searchParams.get("business");
+  let secret = process.env.STRIPE_WEBHOOK_SECRET || null;
+  const adminEarly = createSupabaseAdmin(
+    process.env.NEXT_PUBLIC_SUPABASE_URL,
+    serviceKey,
+    { auth: { persistSession: false } }
+  );
+  if (businessId) {
+    const { data: biz } = await adminEarly
+      .from("businesses")
+      .select("stripe_webhook_secret")
+      .eq("id", businessId)
+      .single();
+    if (biz?.stripe_webhook_secret) secret = biz.stripe_webhook_secret;
+  }
+  if (!secret) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
   }
 
@@ -57,11 +79,7 @@ export async function POST(request) {
     const session = event.data.object;
     const paymentLinkId = session.payment_link;
     if (paymentLinkId && session.payment_status === "paid") {
-      const admin = createSupabaseAdmin(
-        process.env.NEXT_PUBLIC_SUPABASE_URL,
-        serviceKey,
-        { auth: { persistSession: false } }
-      );
+      const admin = adminEarly;
 
       const { data: job } = await admin
         .from("jobs")
@@ -86,14 +104,27 @@ export async function POST(request) {
           sent_at: new Date().toISOString(),
         });
 
-        // Deactivate the link so it can't be paid twice.
+        // Deactivate the link so it can't be paid twice. On per-account
+        // endpoints the event has no .account, so look it up from the job's
+        // business.
         try {
           const { stripeRequest } = await import("@/lib/stripe");
-          await stripeRequest(
-            `/payment_links/${paymentLinkId}`,
-            { active: "false" },
-            { stripeAccount: event.account }
-          );
+          let acct = event.account || null;
+          if (!acct) {
+            const { data: biz } = await admin
+              .from("businesses")
+              .select("stripe_account_id")
+              .eq("id", job.business_id)
+              .single();
+            acct = biz?.stripe_account_id || null;
+          }
+          if (acct) {
+            await stripeRequest(
+              `/payment_links/${paymentLinkId}`,
+              { active: "false" },
+              { stripeAccount: acct }
+            );
+          }
         } catch {
           /* best effort */
         }

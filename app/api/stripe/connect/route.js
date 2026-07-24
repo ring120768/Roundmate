@@ -41,6 +41,27 @@ export async function POST() {
       if (saveErr) {
         return NextResponse.json({ error: saveErr.message }, { status: 500 });
       }
+
+      // Create this account's own webhook endpoint so payments mark jobs
+      // paid automatically — no manual setup, ever.
+      try {
+        const endpoint = await stripeRequest(
+          "/webhook_endpoints",
+          {
+            url: `${APP_URL}/api/stripe/webhook?business=${business.id}`,
+            enabled_events: ["checkout.session.completed"],
+            description:
+              "RoundMate: marks jobs paid when an invoice link is paid",
+          },
+          { stripeAccount: accountId }
+        );
+        await supabase
+          .from("businesses")
+          .update({ stripe_webhook_secret: endpoint.secret })
+          .eq("id", business.id);
+      } catch {
+        /* best effort — the setup route can create it later */
+      }
     }
 
     const link = await stripeRequest("/account_links", {
