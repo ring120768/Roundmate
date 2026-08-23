@@ -84,9 +84,6 @@ textarea {
    screen readers and prefetch). */
 button,
 .btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   padding: 16px;
   font-family: inherit;
@@ -116,6 +113,13 @@ button.secondary,
 }
 button.secondary:active,
 .btn.secondary:active { background: #f3f6ff; }
+
+/* Anchors styled as buttons need explicit centring; <button> does it natively. */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 /* Small inline button (sits beside content instead of spanning the row). */
 .btn-inline {
