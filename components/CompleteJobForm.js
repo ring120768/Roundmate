@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PAYMENT_OUTCOMES, suggestNextDate } from "@/lib/jobOptions";
+import { gbp } from "@/lib/money";
 
 export default function CompleteJobForm({ job }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const customer = job.customers; // { id, first_name, last_name, visit_frequency }
+  const customer = job.customers; // { id, first_name, last_name, email, visit_frequency }
   const suggested = suggestNextDate(job.appointment_date, customer?.visit_frequency);
 
   const [price, setPrice] = useState(job.price ?? "");
@@ -145,6 +146,16 @@ export default function CompleteJobForm({ job }) {
     router.refresh();
   }
 
+  // The button should say what it's about to do — one tap here marks the job
+  // done AND emails the customer, and there's no unsending that.
+  const amountLabel = gbp(price) ? ` · ${gbp(price)}` : "";
+  const submitLabel =
+    outcome === "unpaid"
+      ? `Complete & email invoice${amountLabel}`
+      : outcome === "free"
+      ? "Complete job (no charge)"
+      : `Complete & email receipt${amountLabel}`;
+
   return (
     <div className="card">
       <form onSubmit={handleComplete}>
@@ -159,18 +170,30 @@ export default function CompleteJobForm({ job }) {
           onChange={(e) => setPrice(e.target.value)}
         />
 
-        <label>How was it paid?</label>
-        {PAYMENT_OUTCOMES.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            className={outcome === o.value ? "" : "secondary"}
-            style={{ marginTop: 8 }}
-            onClick={() => setOutcome(o.value)}
-          >
-            {o.label}
-          </button>
-        ))}
+        <label id="paid_label">How was it paid?</label>
+        <div
+          role="group"
+          aria-labelledby="paid_label"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 8,
+            marginTop: 8,
+          }}
+        >
+          {PAYMENT_OUTCOMES.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              aria-pressed={outcome === o.value}
+              className={outcome === o.value ? "" : "secondary"}
+              style={{ marginTop: 0, padding: "14px 8px", fontSize: 15 }}
+              onClick={() => setOutcome(o.value)}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
 
         <label
           htmlFor="book_next"
@@ -247,8 +270,18 @@ export default function CompleteJobForm({ job }) {
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Saving…" : "Complete job"}
+          {loading ? "Saving…" : submitLabel}
         </button>
+        {customer?.email ? (
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
+            Goes to {customer.email} as soon as you tap.
+            {bookNext && nextDate ? " Next visit is confirmed too." : ""}
+          </p>
+        ) : (
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
+            No email on file for this customer — nothing will be sent.
+          </p>
+        )}
         {error && <p className="error">{error}</p>}
       </form>
 

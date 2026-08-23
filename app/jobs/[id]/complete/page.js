@@ -12,7 +12,7 @@ export default async function CompleteJobPage({ params }) {
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("*, customers(id, first_name, last_name, visit_frequency)")
+    .select("*, customers(id, first_name, last_name, email, visit_frequency)")
     .eq("id", id)
     .single();
   if (!job) notFound();

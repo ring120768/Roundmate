@@ -25,8 +25,8 @@ export default function LandingPage() {
       </p>
       <TradePicker />
       <div className="spacer" />
-      <Link href="/dashboard" style={{ width: "100%", maxWidth: 300 }}>
-        <button type="button">Enter</button>
+      <Link href="/dashboard" className="btn" style={{ maxWidth: 300 }}>
+        Enter
       </Link>
     </div>
   );

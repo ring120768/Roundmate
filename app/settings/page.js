@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import Brand from "@/components/Brand";
 import SettingsForm from "@/components/SettingsForm";
 import StripeConnect from "@/components/StripeConnect";
+import AccountantSettings from "@/components/AccountantSettings";
+import SignOutButton from "@/components/SignOutButton";
 import { tradeLabel, tradeImage } from "@/lib/trades";
 
 export default async function SettingsPage() {
@@ -15,7 +17,9 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("business_id, businesses(id, name, owner_name, phone, trade)")
+    .select(
+      "business_id, businesses(id, name, owner_name, phone, trade, accountant_name, accountant_email, accountant_frequency, accountant_last_sent_at)"
+    )
     .eq("id", user.id)
     .single();
   if (!profile?.business_id) redirect("/onboarding");
@@ -32,11 +36,16 @@ export default async function SettingsPage() {
       <StripeConnect />
 
       <div className="spacer" />
-      <Link href="/trade">
-        <button type="button" className="secondary">
-          Change trade — currently {tradeLabel(profile.businesses?.trade) || "not set"}
-        </button>
+      <AccountantSettings business={profile.businesses} />
+
+      <div className="spacer" />
+      <Link href="/trade" className="btn secondary">
+        Change trade — currently{" "}
+        {tradeLabel(profile.businesses?.trade) || "not set"}
       </Link>
+
+      <div className="spacer" />
+      <SignOutButton />
     </div>
   );
 }

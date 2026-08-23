@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { gbp, daysSince, overdueTone } from "@/lib/money";
 
 export default function UnpaidList({ jobs }) {
   const router = useRouter();
@@ -41,44 +42,70 @@ export default function UnpaidList({ jobs }) {
   }
 
   if (jobs.length === 0) {
-    return <p className="muted">Nothing outstanding — all paid up.</p>;
+    return (
+      <div className="empty">
+        <p>
+          <strong>Nothing outstanding</strong>
+        </p>
+        <p className="muted">All paid up. Nice.</p>
+      </div>
+    );
   }
+
+  // Oldest debt first — that's the order you'd chase them in.
+  const sorted = [...jobs].sort(
+    (a, b) => (daysSince(b.completed_at) ?? 0) - (daysSince(a.completed_at) ?? 0)
+  );
 
   return (
     <>
-      {jobs.map((j) => (
-        <div key={j.id} className="card" style={{ marginBottom: 10 }}>
-          <div className="row">
-            <Link
-              href={`/jobs/${j.id}`}
-              style={{ textDecoration: "none", color: "inherit", flex: 1 }}
-            >
-              <strong>
-                {j.customers
-                  ? `${j.customers.first_name} ${j.customers.last_name}`
-                  : "Job"}
-              </strong>
-              <div className="muted">
-                {j.appointment_date
-                  ? new Date(j.appointment_date + "T00:00:00").toLocaleDateString(
-                      "en-GB",
-                      { day: "numeric", month: "short" }
-                    )
-                  : ""}
-                {j.price != null ? ` · £${j.price}` : ""}
-              </div>
-            </Link>
-            <button
-              type="button"
-              onClick={() => markPaid(j.id)}
-              disabled={busyId === j.id}
-              style={{ width: "auto", marginTop: 0, padding: "10px 14px" }}
-            >
-              {busyId === j.id ? "…" : "Mark paid"}
-            </button>
+      {sorted.map((j) => {
+        const days = daysSince(j.completed_at);
+        const tone = overdueTone(days);
+        return (
+          <div key={j.id} className="card" style={{ marginBottom: 10 }}>
+            <div className="row">
+              <Link
+                href={`/jobs/${j.id}`}
+                style={{ textDecoration: "none", color: "inherit", flex: 1 }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <strong>
+                    {j.customers
+                      ? `${j.customers.first_name} ${j.customers.last_name}`
+                      : "Job"}
+                  </strong>
+                  {tone && <span className={tone.className}>{tone.label}</span>}
+                </div>
+                <div className="muted">
+                  {j.appointment_date
+                    ? new Date(
+                        j.appointment_date + "T00:00:00"
+                      ).toLocaleDateString("en-GB", {
+                        day: "numeric",
+                        month: "short",
+                      })
+                    : ""}
+                  {j.price != null ? ` · ${gbp(j.price)}` : ""}
+                  {j.reminder_count > 0
+                    ? ` · ${j.reminder_count} reminder${
+                        j.reminder_count > 1 ? "s" : ""
+                      } sent`
+                    : ""}
+                </div>
+              </Link>
+              <button
+                type="button"
+                className="btn-inline"
+                onClick={() => markPaid(j.id)}
+                disabled={busyId === j.id}
+              >
+                {busyId === j.id ? "…" : "Mark paid"}
+              </button>
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </>
   );
 }

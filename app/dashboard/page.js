@@ -1,11 +1,23 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import SignOutButton from "@/components/SignOutButton";
 import Brand from "@/components/Brand";
 import TradeQuickSwitch from "@/components/TradeQuickSwitch";
 import { statusLabel } from "@/lib/jobOptions";
 import { tradeImage } from "@/lib/trades";
+import { gbp } from "@/lib/money";
+
+// The colourful shortcuts from Ringo's design mock. The bottom tab bar now
+// covers Money / Jobs / Customers / Settings too — these stay because they're
+// the app's face, and Calendar + Fill my round have no tab of their own.
+const TILES = [
+  { href: "/money", cls: "btn-coral", icon: "/icon-money.png", label: "Money" },
+  { href: "/jobs", cls: "btn-indigo", icon: "/icon-jobs.png", label: "My Booked Jobs" },
+  { href: "/calendar", cls: "btn-teal", icon: "/icon-calendar.png", label: "Calendar" },
+  { href: "/rounds", cls: "btn-green", icon: "/icon-round.png", label: "Fill my round" },
+  { href: "/customers", cls: "btn-amber", icon: "/icon-customers.png", label: "Customers" },
+  { href: "/settings", cls: "btn-grey", icon: "/icon-settings.png", label: "Settings" },
+];
 
 export default async function DashboardPage() {
   const supabase = createClient();
@@ -58,7 +70,7 @@ export default async function DashboardPage() {
           </div>
           <div>
             <p className="muted">Day&apos;s value</p>
-            <p className="stat">£{dayValue}</p>
+            <p className="stat">{gbp(dayValue)}</p>
           </div>
         </div>
       </div>
@@ -66,7 +78,20 @@ export default async function DashboardPage() {
       <div className="spacer" />
 
       {jobs.length === 0 ? (
-        <p className="muted">No jobs booked for today.</p>
+        <div className="empty">
+          <p>
+            <strong>Nothing booked today.</strong>
+          </p>
+          <p className="muted">Add a job, or see who&apos;s due nearby.</p>
+          <div className="actions-row">
+            <Link href="/jobs/new" className="btn">
+              Add job
+            </Link>
+            <Link href="/rounds" className="btn secondary">
+              Fill my round
+            </Link>
+          </div>
+        </div>
       ) : (
         jobs.map((j) => (
           <Link
@@ -89,7 +114,7 @@ export default async function DashboardPage() {
                   </div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div>{j.price != null ? `£${j.price}` : ""}</div>
+                  <div>{gbp(j.price)}</div>
                   <div className="muted" style={{ fontSize: 12 }}>
                     {statusLabel(j.status)}
                   </div>
@@ -100,58 +125,21 @@ export default async function DashboardPage() {
         ))
       )}
 
-      <Link href="/jobs/new">
-        <button type="button">+ Add job</button>
+      <Link href="/jobs/new" className="btn">
+        + Add job
       </Link>
 
       <div className="tile-grid">
-        <Link href="/money">
-          <button type="button" className="btn-coral">
+        {TILES.map((t) => (
+          <Link key={t.href} href={t.href} className={`btn ${t.cls}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-money.png" alt="" className="tile-img" aria-hidden="true" />
-            Money
-          </button>
-        </Link>
-        <Link href="/jobs">
-          <button type="button" className="btn-indigo">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-jobs.png" alt="" className="tile-img" aria-hidden="true" />
-            My Booked Jobs
-          </button>
-        </Link>
-        <Link href="/calendar">
-          <button type="button" className="btn-teal">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-calendar.png" alt="" className="tile-img" aria-hidden="true" />
-            Calendar
-          </button>
-        </Link>
-        <Link href="/rounds">
-          <button type="button" className="btn-green">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-round.png" alt="" className="tile-img" aria-hidden="true" />
-            Fill my round
-          </button>
-        </Link>
-        <Link href="/customers">
-          <button type="button" className="btn-amber">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-customers.png" alt="" className="tile-img" aria-hidden="true" />
-            Customers
-          </button>
-        </Link>
-        <Link href="/settings">
-          <button type="button" className="btn-grey">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/icon-settings.png" alt="" className="tile-img" aria-hidden="true" />
-            Settings
-          </button>
-        </Link>
+            <img src={t.icon} alt="" className="tile-img" aria-hidden="true" />
+            <span className="tile-label">{t.label}</span>
+          </Link>
+        ))}
       </div>
 
       <TradeQuickSwitch currentTrade={profile.businesses?.trade ?? null} />
-
-      <SignOutButton />
     </div>
   );
 }

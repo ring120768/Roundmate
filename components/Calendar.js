@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { statusLabel } from "@/lib/jobOptions";
+import { gbp } from "@/lib/money";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const MONTHS = [
@@ -156,7 +157,7 @@ export default function Calendar() {
                   <div className="muted">{j.customers?.postcode || ""}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div>{j.price != null ? `£${j.price}` : ""}</div>
+                  <div>{gbp(j.price)}</div>
                   <div className="muted" style={{ fontSize: 12 }}>
                     {statusLabel(j.status)}
                   </div>
@@ -167,14 +168,12 @@ export default function Calendar() {
         ))
       )}
 
-      <Link href={`/jobs/new?date=${selected}`}>
-        <button type="button">+ Add job on this day</button>
+      <Link href={`/jobs/new?date=${selected}`} className="btn">
+        + Add job on this day
       </Link>
       {selectedJobs.length >= 2 && (
-        <Link href={`/rounds?date=${selected}`}>
-          <button type="button" className="btn-green">
-            🗺️ Order my route for this day
-          </button>
+        <Link href={`/rounds?date=${selected}`} className="btn btn-green">
+          🗺️ Order my route for this day
         </Link>
       )}
     </div>

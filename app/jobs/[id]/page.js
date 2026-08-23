@@ -3,6 +3,8 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { statusLabel, paymentLabel } from "@/lib/jobOptions";
 import SendEmailButtons from "@/components/SendEmailButtons";
+import { gbp } from "@/lib/money";
+import ContactActions from "@/components/ContactActions";
 
 function Field({ label, value }) {
   return (
@@ -25,7 +27,9 @@ export default async function JobDetailPage({ params }) {
 
   const { data: job } = await supabase
     .from("jobs")
-    .select("*, customers(id, first_name, last_name, postcode, email)")
+    .select(
+      "*, customers(id, first_name, last_name, phone, email, address_line_1, town_city, postcode)"
+    )
     .eq("id", id)
     .single();
   if (!job) notFound();
@@ -40,6 +44,9 @@ export default async function JobDetailPage({ params }) {
   }
 
   const cust = job.customers;
+  const custAddress = [cust?.address_line_1, cust?.town_city, cust?.postcode]
+    .filter(Boolean)
+    .join(", ");
   const dateLabel = job.appointment_date
     ? new Date(job.appointment_date + "T00:00:00").toLocaleDateString("en-GB", {
         weekday: "long",
@@ -52,7 +59,11 @@ export default async function JobDetailPage({ params }) {
   return (
     <div className="container">
       <h1>{cust ? `${cust.first_name} ${cust.last_name}` : "Job"}</h1>
-      <p className="muted">{job.service_type}</p>
+      <p className="muted">
+        {job.service_type}
+        {custAddress ? ` · ${custAddress}` : ""}
+      </p>
+      <ContactActions phone={cust?.phone} address={custAddress} />
       <div className="spacer" />
 
       <div className="card">
@@ -60,7 +71,7 @@ export default async function JobDetailPage({ params }) {
         {job.start_time && (
           <Field label="Time" value={job.start_time.slice(0, 5)} />
         )}
-        <Field label="Price" value={job.price != null ? `£${job.price}` : null} />
+        <Field label="Price" value={gbp(job.price) || null} />
         <Field label="Status" value={statusLabel(job.status)} />
         {job.payment_status && (
           <Field label="Payment" value={paymentLabel(job.payment_status)} />
@@ -105,14 +116,12 @@ export default async function JobDetailPage({ params }) {
       </div>
 
       {job.status !== "completed" && (
-        <Link href={`/jobs/${id}/complete`}>
-          <button type="button">Complete job</button>
+        <Link href={`/jobs/${id}/complete`} className="btn">
+          Complete job
         </Link>
       )}
-      <Link href={`/jobs/${id}/edit`}>
-        <button type="button" className="secondary">
-          Edit job
-        </button>
+      <Link href={`/jobs/${id}/edit`} className="btn secondary">
+        Edit job
       </Link>
 
       {job.status === "completed" && (

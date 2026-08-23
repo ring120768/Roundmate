@@ -25,16 +25,40 @@ function csvCell(v) {
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
-export default function AccountsExport() {
+export default function AccountsExport({ accountant }) {
   const supabase = createClient();
   const [from, setFrom] = useState(taxYearStart());
   const [to, setTo] = useState(today());
   const [busy, setBusy] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState("");
   const [error, setError] = useState("");
+
+  // Emails the same range straight to the accountant saved in Settings —
+  // one tap instead of download, find the file, open the mail app, attach.
+  async function sendToAccountant() {
+    setSending(true);
+    setError("");
+    setSent("");
+    try {
+      const res = await fetch("/api/accounts-report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ from, to }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Couldn't send it.");
+      setSent(`Sent ${json.count} job${json.count === 1 ? "" : "s"} to ${json.to}.`);
+    } catch (e) {
+      setError(e.message);
+    }
+    setSending(false);
+  }
 
   async function download() {
     setBusy(true);
     setError("");
+    setSent("");
 
     const { data: jobs, error: qErr } = await supabase
       .from("jobs")
@@ -140,9 +164,33 @@ export default function AccountsExport() {
           />
         </div>
       </div>
-      <button type="button" onClick={download} disabled={busy}>
+      {accountant?.email ? (
+        <button type="button" onClick={sendToAccountant} disabled={sending}>
+          {sending
+            ? "Sending…"
+            : `Send to ${accountant.name || "my accountant"}`}
+        </button>
+      ) : (
+        <p className="muted" style={{ fontSize: 13, marginTop: 16 }}>
+          Add your accountant&apos;s email in Settings and you can send this
+          straight to them — or have it go automatically each month.
+        </p>
+      )}
+
+      <button
+        type="button"
+        className={accountant?.email ? "secondary" : ""}
+        onClick={download}
+        disabled={busy}
+      >
         {busy ? "Preparing…" : "Download CSV"}
       </button>
+
+      {sent && (
+        <p className="note" style={{ color: "var(--ok)" }}>
+          {sent}
+        </p>
+      )}
       {error && <p className="error">{error}</p>}
     </div>
   );
