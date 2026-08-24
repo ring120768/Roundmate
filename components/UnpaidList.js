@@ -10,6 +10,7 @@ export default function UnpaidList({ jobs }) {
   const router = useRouter();
   const supabase = createClient();
   const [busyId, setBusyId] = useState(null);
+  const [receiptWarning, setReceiptWarning] = useState("");
 
   async function markPaid(id) {
     setBusyId(id);
@@ -23,17 +24,27 @@ export default function UnpaidList({ jobs }) {
       })
       .eq("id", id);
 
-    // Send the thank-you receipt too (best effort — marking paid succeeds
-    // even if the customer has no email or the send fails).
+    // Send the thank-you receipt too. Marking paid still succeeds if the send
+    // fails — but say so, rather than letting it disappear.
     if (!error) {
       try {
-        await fetch("/api/send-email", {
+        const res = await fetch("/api/send-email", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ jobId: id, type: "receipt" }),
         });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          setReceiptWarning(
+            `Marked paid, but the receipt didn't send — ${
+              data.error || `send failed (${res.status}).`
+            }`
+          );
+        }
       } catch {
-        /* ignore */
+        setReceiptWarning(
+          "Marked paid, but the receipt didn't send — no connection."
+        );
       }
     }
 
@@ -59,6 +70,7 @@ export default function UnpaidList({ jobs }) {
 
   return (
     <>
+      {receiptWarning && <p className="error">{receiptWarning}</p>}
       {sorted.map((j) => {
         const days = daysSince(j.completed_at);
         const tone = overdueTone(days);
