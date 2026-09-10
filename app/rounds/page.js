@@ -3,6 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import DayPicker from "@/components/DayPicker";
 import RouteOptimizer from "@/components/RouteOptimizer";
+import { gbp } from "@/lib/money";
 
 function ukToday() {
   return new Date().toLocaleDateString("en-CA", { timeZone: "Europe/London" });
@@ -117,16 +118,14 @@ export default async function RoundsPage({ searchParams }) {
                         </strong>
                         <div className="muted">
                           {c.postcode}
-                          {c.default_price != null ? ` · £${c.default_price}` : ""}
+                          {c.default_price != null ? ` · ${gbp(c.default_price)}` : ""}
                         </div>
                       </div>
-                      <Link href={`/jobs/new?customer=${c.id}&date=${date}`}>
-                        <button
-                          type="button"
-                          style={{ width: "auto", marginTop: 0, padding: "10px 16px" }}
-                        >
-                          Book
-                        </button>
+                      <Link
+                        href={`/jobs/new?customer=${c.id}&date=${date}`}
+                        className="btn btn-inline"
+                      >
+                        Book
                       </Link>
                     </div>
                   </div>

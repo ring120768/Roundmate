@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { gbp } from "@/lib/money";
 
 // The outward part of a UK postcode ("CM24 8NR" -> "CM24").
 function outward(pc) {
@@ -173,7 +174,7 @@ export default function CustomerList({ customers }) {
                       </div>
                     </div>
                     <div className="muted">
-                      {c.default_price != null ? `£${c.default_price}` : ""}
+                      {gbp(c.default_price)}
                     </div>
                   </div>
                 </div>

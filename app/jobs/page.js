@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/jobOptions";
+import { gbp } from "@/lib/money";
 
 // Today's date as YYYY-MM-DD in UK time, regardless of where the server runs.
 function ukToday() {
@@ -60,14 +61,24 @@ export default async function JobsPage() {
         <span className="muted">{jobs?.length ?? 0} upcoming</span>
       </div>
 
-      <Link href="/jobs/new">
-        <button type="button">+ Add job</button>
+      <Link href="/jobs/new" className="btn">
+        + Add job
       </Link>
 
       <div className="spacer" />
 
       {dates.length === 0 ? (
-        <p className="muted">No upcoming jobs. Add one above.</p>
+        <div className="empty">
+          <p>
+            <strong>No upcoming jobs.</strong>
+          </p>
+          <p className="muted">
+            Add one above, or let the round suggest who&apos;s due.
+          </p>
+          <Link href="/rounds" className="btn secondary" style={{ marginTop: 14 }}>
+            Fill my round
+          </Link>
+        </div>
       ) : (
         dates.map((date) => (
           <div key={date}>
@@ -93,7 +104,7 @@ export default async function JobsPage() {
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
-                      <div>{j.price != null ? `£${j.price}` : ""}</div>
+                      <div>{gbp(j.price)}</div>
                       <div className="muted" style={{ fontSize: 12 }}>
                         {statusLabel(j.status)}
                       </div>

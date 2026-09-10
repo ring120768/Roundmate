@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { PAID_STATUSES } from "@/lib/jobOptions";
 import UnpaidList from "@/components/UnpaidList";
 import AccountsExport from "@/components/AccountsExport";
+import { gbp, daysSince } from "@/lib/money";
 
 export default async function MoneyPage() {
   const supabase = createClient();
@@ -15,7 +16,9 @@ export default async function MoneyPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("business_id")
+    .select(
+      "business_id, businesses(accountant_name, accountant_email)"
+    )
     .eq("id", user.id)
     .single();
   if (!profile?.business_id) redirect("/onboarding");
@@ -23,7 +26,9 @@ export default async function MoneyPage() {
   // Outstanding: jobs that are done but not paid.
   const { data: unpaid } = await supabase
     .from("jobs")
-    .select("id, appointment_date, service_type, price, customers(first_name, last_name, postcode)")
+    .select(
+      "id, appointment_date, completed_at, service_type, price, reminder_count, customers(first_name, last_name, postcode)"
+    )
     .eq("status", "completed")
     .eq("payment_status", "unpaid")
     .order("appointment_date", { ascending: true });
@@ -32,6 +37,12 @@ export default async function MoneyPage() {
     (sum, j) => sum + (j.price ? Number(j.price) : 0),
     0
   );
+
+  // Anything unpaid a fortnight after completion is the stuff worth a phone
+  // call — the email chaser has already had its three goes by then.
+  const badlyOverdue = (unpaid ?? []).filter(
+    (j) => (daysSince(j.completed_at) ?? 0) >= 14
+  ).length;
 
   // Paid in the last 7 days.
   const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
@@ -55,14 +66,15 @@ export default async function MoneyPage() {
         <div className="row">
           <div>
             <p className="muted">Outstanding</p>
-            <p className="stat">£{outstandingTotal}</p>
+            <p className="stat">{gbp(outstandingTotal)}</p>
             <p className="muted" style={{ fontSize: 12 }}>
               {(unpaid ?? []).length} unpaid
+              {badlyOverdue > 0 ? ` · ${badlyOverdue} over 14 days` : ""}
             </p>
           </div>
           <div>
             <p className="muted">Paid this week</p>
-            <p className="stat">£{paidWeekTotal}</p>
+            <p className="stat">{gbp(paidWeekTotal)}</p>
           </div>
         </div>
       </div>
@@ -73,7 +85,12 @@ export default async function MoneyPage() {
 
       <div className="spacer" />
       <h2>Accounts</h2>
-      <AccountsExport />
+      <AccountsExport
+        accountant={{
+          name: profile.businesses?.accountant_name,
+          email: profile.businesses?.accountant_email,
+        }}
+      />
 
       <Link href="/dashboard" className="linklike">
         ← Back to dashboard

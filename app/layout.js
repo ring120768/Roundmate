@@ -1,4 +1,5 @@
 import "./globals.css";
+import BottomNav from "@/components/BottomNav";
 
 export const metadata = {
   title: "RoundMate",
@@ -45,6 +46,7 @@ export default function RootLayout({ children }) {
           <span aria-hidden="true">←</span> Find a tradesperson
         </a>
         {children}
+        <BottomNav />
       </body>
     </html>
   );

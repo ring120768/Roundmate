@@ -2,6 +2,8 @@ import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { statusLabel } from "@/lib/jobOptions";
+import { gbp } from "@/lib/money";
+import ContactActions from "@/components/ContactActions";
 
 function Field({ label, value }) {
   return (
@@ -47,6 +49,7 @@ export default async function CustomerDetailPage({ params }) {
       <h1>
         {c.first_name} {c.last_name}
       </h1>
+      <ContactActions phone={c.phone} address={fullAddress} />
       <div className="spacer" />
 
       <div className="card">
@@ -55,26 +58,26 @@ export default async function CustomerDetailPage({ params }) {
         <Field label="Email" value={c.email} />
         <Field
           label="Default price"
-          value={c.default_price != null ? `£${c.default_price}` : null}
+          value={gbp(c.default_price) || null}
         />
         <Field label="Visit frequency" value={c.visit_frequency} />
         <Field label="Access notes" value={c.access_notes} />
       </div>
 
-      <Link href={`/customers/${id}/edit`}>
-        <button type="button">Edit</button>
+      <Link href={`/jobs/new?customer=${id}`} className="btn">
+        Book a job
       </Link>
 
-      <Link href={`/jobs/new?customer=${id}`}>
-        <button type="button" className="secondary">
-          Book a job
-        </button>
+      <Link href={`/customers/${id}/edit`} className="btn secondary">
+        Edit customer
       </Link>
 
       <div className="spacer" />
       <h2>Jobs</h2>
       {!jobs || jobs.length === 0 ? (
-        <p className="muted">No jobs yet for this customer.</p>
+        <div className="empty">
+          <p className="muted">No jobs yet for this customer.</p>
+        </div>
       ) : (
         jobs.map((j) => (
           <Link
@@ -99,7 +102,7 @@ export default async function CustomerDetailPage({ params }) {
                   <div className="muted">{j.service_type}</div>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  <div>{j.price != null ? `£${j.price}` : ""}</div>
+                  <div>{gbp(j.price)}</div>
                   <div className="muted" style={{ fontSize: 12 }}>
                     {statusLabel(j.status)}
                   </div>

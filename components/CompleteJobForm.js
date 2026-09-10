@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { PAYMENT_OUTCOMES, suggestNextDate } from "@/lib/jobOptions";
+import { gbp } from "@/lib/money";
 
 export default function CompleteJobForm({ job }) {
   const router = useRouter();
   const supabase = createClient();
 
-  const customer = job.customers; // { id, first_name, last_name, visit_frequency }
+  const customer = job.customers; // { id, first_name, last_name, email, visit_frequency }
   const suggested = suggestNextDate(job.appointment_date, customer?.visit_frequency);
 
   const [price, setPrice] = useState(job.price ?? "");
@@ -20,6 +21,7 @@ export default function CompleteJobForm({ job }) {
   const [note, setNote] = useState("");
   const [photos, setPhotos] = useState([]);
   const [error, setError] = useState("");
+  const [emailFailures, setEmailFailures] = useState(null);
   const [loading, setLoading] = useState(false);
 
   // Shrink a photo before upload — van 4G doesn't want 8MB originals, and
@@ -44,16 +46,21 @@ export default function CompleteJobForm({ job }) {
     e.target.value = ""; // allow picking the same file again
   }
 
-  // Best-effort email send — completion still succeeds even if an email fails.
+  // The job is saved before any email is attempted, so a send failure never
+  // costs you the completion. But it does get reported — a silent failure
+  // here means an invoice the customer never got and money you never chase.
   async function fireEmail(jobId, type) {
     try {
-      await fetch("/api/send-email", {
+      const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jobId, type }),
       });
+      if (res.ok) return { ok: true };
+      const data = await res.json().catch(() => ({}));
+      return { ok: false, error: data.error || `Send failed (${res.status}).` };
     } catch {
-      /* ignore */
+      return { ok: false, error: "No connection — nothing was sent." };
     }
   }
 
@@ -111,13 +118,18 @@ export default function CompleteJobForm({ job }) {
     }
 
     // Auto-send the money email: invoice if unpaid, receipt if paid.
+    // No address on file isn't a failure — there was nothing to send.
+    const failures = [];
     const moneyType =
       outcome === "unpaid"
         ? "invoice"
         : outcome === "cash" || outcome === "bank"
         ? "receipt"
         : null;
-    if (moneyType) await fireEmail(job.id, moneyType);
+    if (moneyType && customer?.email) {
+      const sent = await fireEmail(job.id, moneyType);
+      if (!sent.ok) failures.push({ what: `The ${moneyType}`, why: sent.error });
+    }
 
     // Auto-book the next visit and send its confirmation.
     if (bookNext && nextDate && customer?.id) {
@@ -137,12 +149,61 @@ export default function CompleteJobForm({ job }) {
         );
         return;
       }
-      await fireEmail(nextId, "confirmation");
+      if (customer.email) {
+        const sent = await fireEmail(nextId, "confirmation");
+        if (!sent.ok) {
+          failures.push({ what: "The next-visit confirmation", why: sent.error });
+        }
+      }
     }
 
     setLoading(false);
+
+    // Something didn't send — stay put and say so, rather than bouncing to the
+    // dashboard as though everything worked.
+    if (failures.length) {
+      setEmailFailures(failures);
+      return;
+    }
+
     router.push("/dashboard");
     router.refresh();
+  }
+
+  // The button should say what it's about to do — one tap here marks the job
+  // done AND emails the customer, and there's no unsending that.
+  const amountLabel = gbp(price) ? ` · ${gbp(price)}` : "";
+  const submitLabel =
+    outcome === "unpaid"
+      ? `Complete & email invoice${amountLabel}`
+      : outcome === "free"
+      ? "Complete job (no charge)"
+      : `Complete & email receipt${amountLabel}`;
+
+  if (emailFailures) {
+    return (
+      <div className="card">
+        <p style={{ marginTop: 0 }}>
+          <strong>Job saved — but the email didn&apos;t go.</strong>
+        </p>
+        <p className="muted">
+          The job is marked complete and the payment recorded. Only the email
+          failed, so nothing is lost — but {customer?.first_name || "your customer"}{" "}
+          hasn&apos;t been told.
+        </p>
+        {emailFailures.map((f, i) => (
+          <p key={i} className="error" style={{ marginTop: 8 }}>
+            {f.what} didn&apos;t send — {f.why}
+          </p>
+        ))}
+        <Link href={`/jobs/${job.id}`} className="btn">
+          Open the job and try again
+        </Link>
+        <Link href="/dashboard" className="btn secondary">
+          Back to today
+        </Link>
+      </div>
+    );
   }
 
   return (
@@ -159,18 +220,30 @@ export default function CompleteJobForm({ job }) {
           onChange={(e) => setPrice(e.target.value)}
         />
 
-        <label>How was it paid?</label>
-        {PAYMENT_OUTCOMES.map((o) => (
-          <button
-            key={o.value}
-            type="button"
-            className={outcome === o.value ? "" : "secondary"}
-            style={{ marginTop: 8 }}
-            onClick={() => setOutcome(o.value)}
-          >
-            {o.label}
-          </button>
-        ))}
+        <label id="paid_label">How was it paid?</label>
+        <div
+          role="group"
+          aria-labelledby="paid_label"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: 8,
+            marginTop: 8,
+          }}
+        >
+          {PAYMENT_OUTCOMES.map((o) => (
+            <button
+              key={o.value}
+              type="button"
+              aria-pressed={outcome === o.value}
+              className={outcome === o.value ? "" : "secondary"}
+              style={{ marginTop: 0, padding: "14px 8px", fontSize: 15 }}
+              onClick={() => setOutcome(o.value)}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
 
         <label
           htmlFor="book_next"
@@ -247,8 +320,18 @@ export default function CompleteJobForm({ job }) {
         />
 
         <button type="submit" disabled={loading}>
-          {loading ? "Saving…" : "Complete job"}
+          {loading ? "Saving…" : submitLabel}
         </button>
+        {customer?.email ? (
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
+            Goes to {customer.email} as soon as you tap.
+            {bookNext && nextDate ? " Next visit is confirmed too." : ""}
+          </p>
+        ) : (
+          <p className="muted" style={{ fontSize: 13, marginTop: 8 }}>
+            No email on file for this customer — nothing will be sent.
+          </p>
+        )}
         {error && <p className="error">{error}</p>}
       </form>
 
