@@ -167,7 +167,7 @@ alter function public.refresh_listing_rating() set search_path = public, pg_temp
 -- 7. Seeding the price book  (INVESTIGATED 2026-09-10, NOT YET WRITTEN)
 --
 -- lib/trades.js still holds each trade's menu as a plain array of strings:
--- 9 trades, 71 services in total, no ids and no prices. jobs.service_type is
+-- 9 trades, 70 service entries in total, no ids and no prices. jobs.service_type is
 -- free text written from components/JobForm.js (servicesForTrade(trade),
 -- defaulting to serviceTypes[0]) and read back in ~10 places, including
 -- components/AccountsExport.js and app/api/optimize-route/route.js.
